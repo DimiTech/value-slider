@@ -90,7 +90,7 @@
 	}
 
 	function setGlobalListeners(self) {
-		
+
 	}
 
 	function setRightHandleListener(self) {
@@ -100,16 +100,20 @@
 
 		rightHandle.onmousedown = function(event) {
 
-			self.rightHandleMouseDown = true;
+			if (self.rightHandleMouseDown === false) 
+				self.rightHandleMouseDown = true;
 
-			document.onmouseup   = function(event) { self.rightHandleMouseDown = false; };
+			document.onmouseup   = function(event) { if (self.rightHandleMouseDown) self.rightHandleMouseDown = false; };
 
 			document.onmousemove = function(event) {
-				if (self.rightHandleMouseDown) {
+				if (self.rightHandleMouseDown && event.which === 1) {
 
+					// work on top of this
 					var mousePosition = ~~((event.clientX - self.widget.offsetLeft) * 100 / self.widget.clientWidth + 1);
 					if (mousePosition > 100) mousePosition = 100;
 					else if (mousePosition < 0) mousePosition = 0;
+					// work on top of this
+					
 					self.setValue(mousePosition);
 				}
 			};
