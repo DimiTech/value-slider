@@ -24,14 +24,4 @@
 
     border-radius: 50%;
 	background-color: #fff;
-
-	/* This is to solve some chrome dragging bugs,
-	   for example when you try to drag the handle while 
-	   some text is selected */
-	user-drag: none; 
-	user-select: none;
-	-moz-user-select: none;
-	-webkit-user-drag: none;
-	-webkit-user-select: none;
-	-ms-user-select: none;
 }

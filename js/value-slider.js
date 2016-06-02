@@ -23,8 +23,14 @@
 
 		this.setValue(options.value || 0); // Short-circuit evaluate the value value
 
+		setMinMaxAndStep(this, options.minValue || 0, 
+							   options.maxValue || 100, 
+							   options.step     || 1   );
+
 		setEventListeners(this);
 
+		// Show the widget only when it's completely loaded
+		this.show();
 	};
 
 	/* ------------------------------------- Private functions ------------------------------------- */
@@ -46,6 +52,9 @@
 		self.widget.className = 'value-slider-container'; 
 		self.parentElement.appendChild(self.widget);
 
+		// Hide the widget until it's fully loaded
+		self.hide();
+
 		// Create a slider value <div> and append it to the container <div>
 		var valueSliderDiv = document.createElement('div');
 		valueSliderDiv.className = 'slider-value';
@@ -55,6 +64,12 @@
 		var rightHandleDiv = document.createElement('div');
 		rightHandleDiv.className = 'slider-handle-right';
 		self.widget.children[0].appendChild(rightHandleDiv);
+	}
+
+	function setMinMaxAndStep(self, min, max, step) {
+		self.minValue = min;
+		self.maxValue = max;
+		self.step = step;
 	}
 
 
@@ -77,19 +92,24 @@
 		return value;
 	}
 
+	// Clears user text selection on the page
+	function clearSelection() {
+	    if (document.selection) {
+	        document.selection.empty();
+	    } else if (window.getSelection) {
+	        window.getSelection().removeAllRanges();
+	    }
+	}
+
 	/* -------------------------------------- Event Listeners -------------------------------------- */
 
 	
 
 	function setEventListeners(self) {
 
-
 		setRightHandleListener(self);
 
-		setGlobalListeners(self);
-	}
-
-	function setGlobalListeners(self) {
+		setClickListener(self);
 
 	}
 
@@ -100,36 +120,75 @@
 
 		rightHandle.onmousedown = function(event) {
 
+			// We need to clear the selection to prevent bugs in chrome and old IE browsers
+			clearSelection();
+
 			if (self.rightHandleMouseDown === false) 
 				self.rightHandleMouseDown = true;
 
 			document.onmouseup   = function(event) { if (self.rightHandleMouseDown) self.rightHandleMouseDown = false; };
 
 			document.onmousemove = function(event) {
+
 				if (self.rightHandleMouseDown && event.which === 1) {
 
 					// work on top of this
-					var mousePosition = ~~((event.clientX - self.widget.offsetLeft) * 100 / self.widget.clientWidth + 1);
-					if (mousePosition > 100) mousePosition = 100;
-					else if (mousePosition < 0) mousePosition = 0;
+					var mousePosition = getPositionOnSlider(self, event.clientX);
+
+					mousePosition = clipMousePos(mousePosition);
 					// work on top of this
-					
+				
 					self.setValue(mousePosition);
 				}
 			};
 		};
 
+	}
 
+	/**
+	*	Returns the position of the mouse on the slider - from 0 to 100
+	*
+	*	@returns {Number} mousePosition
+	*/
+	function getPositionOnSlider(self, clientX) {
+		var mousePosition = ~~((clientX - self.widget.offsetLeft) * 100 / self.widget.clientWidth + 0.5);
+		return mousePosition;
+	}
 
+	// Clip the mouse position on the slider
+	function clipMousePos(mousePos) {
+		if (mousePos > 100) mousePos = 100;
+		else if (mousePos < 0) mousePos = 0;
+		return mousePos;
+	}
+
+	function setClickListener(self) {
+		var rightHandle = self.widget.getElementsByClassName('slider-handle-right')[0];
+
+		self.widget.onmousedown = function(event) {
+			if (self.rightHandleMouseDown === false) {
+
+				var mousePosition = getPositionOnSlider(self, event.clientX);
+				self.setValue(mousePosition);
+				
+				// Simulate mousedown event on the right handle
+				simulateMouseDown(rightHandle);
+			}
+		};
+
+		function simulateMouseDown(node) {
+			var mouseDownEvt = document.createEvent('MouseEvents');
+			mouseDownEvt.initEvent('mousedown', true, true);
+			node.dispatchEvent(mouseDownEvt);
+		}
 	}
 
 	/* ---------------------------------------- Public API ----------------------------------------- */
-
 	
+	// __________ Setters __________ \\
+
 	ValueSlider.prototype.setValue = function(value) {
-
 		this.setRightValue(value);
-
 	};
 
 	ValueSlider.prototype.setRightValue = function(value) {
@@ -142,14 +201,36 @@
 		renderValue(this);
 	};
 
+
+	// __________ Getters __________ \\
+
 	ValueSlider.prototype.getValue = function() {
-		this.getRightValue();
+		return this.getRightValue();
 	};
 
 	ValueSlider.prototype.getRightValue = function() {
 		return this.rightValue;
 	};
 
+
+	// ______ Display methods ______ \\
+
+	ValueSlider.prototype.hide = function() {
+		this.widget.style.visibility = 'hidden';
+	};
+
+	ValueSlider.prototype.show = function() {
+		this.widget.style.visibility = 'visible';
+	};
+
+	ValueSlider.prototype.remove = function() {
+		this.display('none');
+	};
+
+	ValueSlider.prototype.display = function(display) {
+		var displayVal = display || 'block';
+		this.widget.style.display = displayVal;
+	};
 
 	/* ------------------------------------ Public Constructor ------------------------------------- */
 

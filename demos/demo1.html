@@ -29,12 +29,14 @@
 	<div id="value-slider3"></div>
 	
 	<script type="text/javascript">
-		window.onload = function() {
 
 			var valueSliderDiv = document.getElementById('value-slider');
 			var valueSlider1 = new ValueSlider({
 				div: valueSliderDiv,
-				value: 30
+				value: 30,
+				minValue: 0,
+				maxValue: 300,
+				step: 10
 			});
 			console.log(valueSlider1);
 
@@ -49,7 +51,6 @@
 			});
 			console.log(valueSlider3);
 
-		};
 		
 	</script>
 </body>
