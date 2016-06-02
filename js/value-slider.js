@@ -10,16 +10,6 @@
 	*	@classdesc Creates a new "value slider" widget inside the given <div> element
 	*	
 	*	@param {Object} options - Options for initializing the component
-
-		// TODO: DELETE THIS
-	*	@param {Object} options.div - The div element which will contain the widget
-	*	@param {Number} options.value - Value of the single handle
-	*	@param {Number} options.rightValue - Value of the right handle
-	*	@param {Number} options.leftValue - Value of the left handle
-	*	@param {Number} options.minValue - Widget's minimum value (the default is 0)
-	*	@param {Number} options.maxValue - Widget's minimum value (the default is 100)
-	*	@param {Number} options.step - Widget's value step (the defualt is 1)
-	*
 	*/
 	var ValueSlider = function(options) {
 
@@ -75,21 +65,34 @@
 	function setMinMaxAndStep(self, min, max, step) {
 		self.minValue = min;
 		self.maxValue = max;
-		self.step     = step;
+
+		// Check if step divides the value range correctly
+		if ((self.maxValue - self.minValue) % step === 0)
+			self.step = step;
+		else
+			throw new Error('Slider\'s range (maxValue - minValue) must be divisible by step value without a remainder.');
 	}
 
-	// Renders the widget
+	/**
+	*	The main rendering function
+	*/
 	function renderValue(self) {
 		var valueSliderDiv = self.widget.children[0];
-		var value = ~~(self.rightValue * 100 / (self.maxValue - self.minValue));
-		valueSliderDiv.style.width = value + '%';
-	}
 
-	// Checks and cleans slider values
-	function cleanValue(self, value) {
-		value = ~~ (value * (self.maxValue - self.minValue)); // Cast to int
-		value = clipValue(value, self.minValue, self.maxValue, true);
-		return value;
+		// Take step into account
+		var stepRemainder = self.rightValue % self.step;
+
+		// smooth out the transitions
+		if (stepRemainder >= self.step / 2)
+			self.rightValue = self.rightValue - stepRemainder + self.step;
+		else
+			self.rightValue = self.rightValue - stepRemainder;
+
+		var value = ~~((self.rightValue - self.minValue) * 100 / (self.maxValue - self.minValue));
+
+		valueSliderDiv.style.width = value + '%';
+
+		console.log(self.rightValue);
 	}
 
 	function clipValue(value, min, max, toInt) {
@@ -146,7 +149,7 @@
 
 					mousePosition = clipValue(mousePosition, 0, 1, false);
 				
-					self.setPercent(mousePosition);
+					self.setRightPercent(mousePosition);
 				}
 			};
 		};
@@ -170,7 +173,7 @@
 			if (self.rightHandleMouseDown === false) {
 
 				var mousePosition = getPositionOnSlider(self, event.clientX);
-				self.setPercent(mousePosition);
+				self.setRightPercent(mousePosition);
 				
 				// Simulate mousedown event on the right handle
 				simulateMouseDown(rightHandle);
@@ -195,10 +198,10 @@
 	ValueSlider.prototype.setRightPercent = function(perc, funcName) {
 		if (typeof perc === 'number') {
 
-			var value = cleanValue(this, perc);
+			var value = ~~ (perc * (this.maxValue - this.minValue) + this.minValue);
 
 			// Set the value
-			this.rightValue = value;
+			this.rightValue = clipValue(value, 0, this.maxValue, true);
 
 			// Render the widget		
 			renderValue(this);
@@ -212,7 +215,8 @@
 
 	ValueSlider.prototype.setRightValue = function(value, funcName) {
 		if (typeof value === 'number') {
-			this.rightValue = clipValue(value, self.minValue, self.maxValue, true); // Set the value
+
+			this.rightValue = clipValue(value, this.minValue, this.maxValue, true); // Set the value
 			renderValue(this); // Render the widget
 		} else 
 			throw new Error((funcName || 'setRightValue()') + ' expects a number parameter! (a value from ' + this.minValue + ' to ' + this.maxValue + ')');

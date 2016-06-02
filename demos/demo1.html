@@ -33,15 +33,16 @@
 			var valueSliderDiv = document.getElementById('value-slider');
 			var valueSlider1 = new ValueSlider({
 				div: valueSliderDiv,
-				value: 30,
+				value: 300,
 				minValue: 50,
 				maxValue: 300,
-				step: 10
+				step: 25
 			});
 			console.log(valueSlider1);
 
 			var valueSlider2 = new ValueSlider({
-				div: $('#value-slider2')
+				div: $('#value-slider2'),
+				maxValue: 200
 			});
 			console.log(valueSlider2);
 
