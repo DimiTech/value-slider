@@ -2,17 +2,23 @@
 
 	"use strict";
 
+
 	/**
 	*	Widget constructor
 	*
 	*	@class ValueSlider
 	*	@classdesc Creates a new "value slider" widget inside the given <div> element
-	*
+	*	
 	*	@param {Object} options - Options for initializing the component
+
+		// TODO: DELETE THIS
 	*	@param {Object} options.div - The div element which will contain the widget
 	*	@param {Number} options.value - Value of the single handle
 	*	@param {Number} options.rightValue - Value of the right handle
 	*	@param {Number} options.leftValue - Value of the left handle
+	*	@param {Number} options.minValue - Widget's minimum value (the default is 0)
+	*	@param {Number} options.maxValue - Widget's minimum value (the default is 100)
+	*	@param {Number} options.step - Widget's value step (the defualt is 1)
 	*
 	*/
 	var ValueSlider = function(options) {
@@ -21,11 +27,11 @@
 		
 		createWidget(this);
 
-		this.setValue(options.value || 0); // Short-circuit evaluate the value value
-
 		setMinMaxAndStep(this, options.minValue || 0, 
 							   options.maxValue || 100, 
 							   options.step     || 1   );
+
+		this.setValue(options.value || 0); // Short-circuit evaluate the value value
 
 		setEventListeners(this);
 
@@ -49,7 +55,7 @@
 	function createWidget(self) {
 		// Create a container <div>
 		self.widget = document.createElement('div');
-		self.widget.className = 'value-slider-container'; 
+		self.widget.className = 'value-slider-body'; 
 		self.parentElement.appendChild(self.widget);
 
 		// Hide the widget until it's fully loaded
@@ -57,7 +63,7 @@
 
 		// Create a slider value <div> and append it to the container <div>
 		var valueSliderDiv = document.createElement('div');
-		valueSliderDiv.className = 'slider-value';
+		valueSliderDiv.className = 'slider-value-right';
 		self.widget.appendChild(valueSliderDiv);
 
 		// Create a right handle <div> and append it to the loading line <div>
@@ -69,26 +75,31 @@
 	function setMinMaxAndStep(self, min, max, step) {
 		self.minValue = min;
 		self.maxValue = max;
-		self.step = step;
+		self.step     = step;
 	}
 
-
+	// Renders the widget
 	function renderValue(self) {
 		var valueSliderDiv = self.widget.children[0];
-		valueSliderDiv.style.width = self.rightValue + '%';
+		var value = ~~(self.rightValue * 100 / (self.maxValue - self.minValue));
+		valueSliderDiv.style.width = value + '%';
 	}
 
-	
 	// Checks and cleans slider values
-	function cleanValue(value, funct) {
-		if (typeof value === 'number') {
-			value = ~~ value; // Cast to int
-			// if (value < -100)
-			// 	value = -100;
-			// else if (value > 100)
-			// 	value = 100;
-		} else 
-			throw new Error(funct + ' expects a number parameter! (a value from 0 to 100)');
+	function cleanValue(self, value) {
+		value = ~~ (value * (self.maxValue - self.minValue)); // Cast to int
+		value = clipValue(value, self.minValue, self.maxValue, true);
+		return value;
+	}
+
+	function clipValue(value, min, max, toInt) {
+		if (value < min)
+			value = min;
+		else if (value > max)
+			value = max;
+
+		if (toInt) value = ~~value;
+
 		return value;
 	}
 
@@ -101,9 +112,7 @@
 	    }
 	}
 
-	/* -------------------------------------- Event Listeners -------------------------------------- */
-
-	
+	/* -------------------------------------- Event Listeners -------------------------------------- */	
 
 	function setEventListeners(self) {
 
@@ -132,13 +141,12 @@
 
 				if (self.rightHandleMouseDown && event.which === 1) {
 
-					// work on top of this
+					// Get mouse position on the slider
 					var mousePosition = getPositionOnSlider(self, event.clientX);
 
-					mousePosition = clipMousePos(mousePosition);
-					// work on top of this
+					mousePosition = clipValue(mousePosition, 0, 1, false);
 				
-					self.setValue(mousePosition);
+					self.setPercent(mousePosition);
 				}
 			};
 		};
@@ -151,15 +159,8 @@
 	*	@returns {Number} mousePosition
 	*/
 	function getPositionOnSlider(self, clientX) {
-		var mousePosition = ~~((clientX - self.widget.offsetLeft) * 100 / self.widget.clientWidth + 0.5);
+		var mousePosition = ((clientX - self.widget.offsetLeft) / self.widget.clientWidth + 0.005);
 		return mousePosition;
-	}
-
-	// Clip the mouse position on the slider
-	function clipMousePos(mousePos) {
-		if (mousePos > 100) mousePos = 100;
-		else if (mousePos < 0) mousePos = 0;
-		return mousePos;
 	}
 
 	function setClickListener(self) {
@@ -169,7 +170,7 @@
 			if (self.rightHandleMouseDown === false) {
 
 				var mousePosition = getPositionOnSlider(self, event.clientX);
-				self.setValue(mousePosition);
+				self.setPercent(mousePosition);
 				
 				// Simulate mousedown event on the right handle
 				simulateMouseDown(rightHandle);
@@ -187,18 +188,34 @@
 	
 	// __________ Setters __________ \\
 
-	ValueSlider.prototype.setValue = function(value) {
-		this.setRightValue(value);
+	ValueSlider.prototype.setPercent = function(perc) {
+		this.setRightPercent(perc, 'setPercent()');
 	};
 
-	ValueSlider.prototype.setRightValue = function(value) {
-		value = cleanValue(value, 'setValue()');
+	ValueSlider.prototype.setRightPercent = function(perc, funcName) {
+		if (typeof perc === 'number') {
 
-		// Set the value
-		this.rightValue = value;
+			var value = cleanValue(this, perc);
 
-		// Render the widget		
-		renderValue(this);
+			// Set the value
+			this.rightValue = value;
+
+			// Render the widget		
+			renderValue(this);
+		} else 
+			throw new Error((funcName || 'setRightPercent()') + ' expects a floating point number parameter! (a value from 0.0 to 1.0)');
+	};
+
+	ValueSlider.prototype.setValue = function(value) {
+		this.setRightValue(value, 'setValue()');
+	};
+
+	ValueSlider.prototype.setRightValue = function(value, funcName) {
+		if (typeof value === 'number') {
+			this.rightValue = clipValue(value, self.minValue, self.maxValue, true); // Set the value
+			renderValue(this); // Render the widget
+		} else 
+			throw new Error((funcName || 'setRightValue()') + ' expects a number parameter! (a value from ' + this.minValue + ' to ' + this.maxValue + ')');
 	};
 
 

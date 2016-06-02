@@ -1,4 +1,4 @@
-.value-slider-container {
+.value-slider-body {
 	display: block;
 	width: 100%;
 	height: 10px;
@@ -9,7 +9,7 @@
 	cursor: pointer;
 }
 
-.slider-value { 
+.slider-value-right { 
 	width: 100%;
 	height: 100%;
 	background-color: #de8c33;
