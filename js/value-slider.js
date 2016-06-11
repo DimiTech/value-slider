@@ -113,15 +113,6 @@
 		return value;
 	}
 
-	// Clears user text selection on the page
-	function clearSelection() {
-	    if (document.selection) {
-	        document.selection.empty();
-	    } else if (window.getSelection) {
-	        window.getSelection().removeAllRanges();
-	    }
-	}
-
 	/* -------------------------------------- Event Listeners -------------------------------------- */	
 
 	function setEventListeners(self) {
@@ -139,8 +130,7 @@
 
 		rightHandle.onmousedown = function(event) {
 
-			// We need to clear the selection to prevent bugs in chrome and old IE browsers
-			clearSelection();
+			event.preventDefault(); // Prevents selection
 
 			if (self.rightHandleMouseDown === false) 
 				self.rightHandleMouseDown = true;
