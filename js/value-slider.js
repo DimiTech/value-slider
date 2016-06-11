@@ -178,7 +178,7 @@
 	function setClickListener(self) {
 		var rightHandle = self.widget.getElementsByClassName('slider-handle-right')[0];
 
-		self.widget.onmousedown = function(event) {
+		self.widget.addEventListener('mousedown', function(event) {
 			if (self.rightHandleMouseDown === false) {
 
 				var mousePosition = getPositionOnSlider(self, event.clientX);
@@ -187,7 +187,7 @@
 				// Simulate mousedown event on the right handle
 				simulateMouseDown(rightHandle);
 			}
-		};
+		});
 
 		function simulateMouseDown(node) {
 			var mouseDownEvt = document.createEvent('MouseEvents');
