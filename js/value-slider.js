@@ -2,12 +2,11 @@
 
 	"use strict";
 
-
 	/**
 	*	Widget constructor
 	*
 	*	@class ValueSlider
-	*	@classdesc Creates a new "value slider" widget inside the given <div> element
+	*	@classdesc Creates a new value slider widget inside the given <div> element
 	*	
 	*	@param {Object} options - Options for initializing the component
 	*/
@@ -63,8 +62,11 @@
 	}
 
 	function setMinMaxAndStep(self, min, max, step) {
-		self.minValue = min;
-		self.maxValue = max;
+		if (min < max) {
+			self.minValue = min;
+			self.maxValue = max;
+		} else
+			throw new Error('Slider\'s minValue must be smaller than its maxValue.');
 
 		// Check if step divides the value range correctly
 		if ((self.maxValue - self.minValue) % step === 0)
@@ -79,7 +81,18 @@
 	function renderValue(self) {
 		var valueSliderDiv = self.widget.children[0];
 
-		// Take step into account
+		if (self.step !== 0)
+			calculateSteps(self);
+
+		var value = ~~((self.rightValue - self.minValue) * 100 / (self.maxValue - self.minValue));
+
+		valueSliderDiv.style.width = value + '%';
+
+		console.log(self.rightValue);
+	}
+
+	// Take step into account
+	function calculateSteps(self) {
 		var stepRemainder = self.rightValue % self.step;
 
 		// smooth out the transitions
@@ -87,12 +100,6 @@
 			self.rightValue = self.rightValue - stepRemainder + self.step;
 		else
 			self.rightValue = self.rightValue - stepRemainder;
-
-		var value = ~~((self.rightValue - self.minValue) * 100 / (self.maxValue - self.minValue));
-
-		valueSliderDiv.style.width = value + '%';
-
-		console.log(self.rightValue);
 	}
 
 	function clipValue(value, min, max, toInt) {
@@ -138,10 +145,12 @@
 			if (self.rightHandleMouseDown === false) 
 				self.rightHandleMouseDown = true;
 
-			document.onmouseup   = function(event) { if (self.rightHandleMouseDown) self.rightHandleMouseDown = false; };
+			document.addEventListener('mouseup', function(event) { 
+				if (self.rightHandleMouseDown) 
+					self.rightHandleMouseDown = false; 
+			});
 
-			document.onmousemove = function(event) {
-
+			document.addEventListener('mousemove', function(event) {
 				if (self.rightHandleMouseDown && event.which === 1) {
 
 					// Get mouse position on the slider
@@ -151,7 +160,7 @@
 				
 					self.setRightPercent(mousePosition);
 				}
-			};
+			});
 		};
 
 	}
