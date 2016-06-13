@@ -1,0 +1,26 @@
+{
+  "name": "value-slider",
+  "version": "1.0.0",
+  "description": "A value range slider UI widget for the web.",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/DusanDimitric/value-slider.git"
+  },
+  "keywords": [
+    "UI",
+    "Widget",
+    "Value",
+    "Slider"
+  ],
+  "author": "Dušan Dimitrić",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DusanDimitric/value-slider/issues"
+  },
+  "homepage": "https://github.com/DusanDimitric/value-slider#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-uglify": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0"
+  }
+}
