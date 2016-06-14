@@ -6,7 +6,7 @@
 
     <link href="../css/value-slider.css" type="text/css" rel="stylesheet">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js" type="text/javascript"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js" type="text/javascript"></script> -->
     <script src="../src/value-slider.js" type="text/javascript"></script>
 
     <!-- Just some quick styling -->
@@ -25,30 +25,34 @@
 
 	<h1>Demo 1:</h1>
 	<input id="value-slider"  type="text">
-	<input id="value-slider2" type="text">
-	<input id="value-slider3" type="text" value="70">
+	<!-- <input id="value-slider2" type="text"> -->
+	<input id="value-slider3" type="text" value="40">
 	
 	<script type="text/javascript">
 
 			var valueSliderDiv = document.getElementById('value-slider');
 			var valueSlider1 = new ValueSlider({
 				element: valueSliderDiv,
-				value: 300,
+				value: 150,
 				minValue: 50,
 				maxValue: 300,
-				step: 25
+				// step: 50
 			});
 			// console.log(valueSlider1);
 
-			var valueSlider2 = new ValueSlider({
-				element: $('#value-slider2'),
-				maxValue: 2000,
-				step: 100
-			});
+			// var valueSlider2 = new ValueSlider({
+			// 	element: $('#value-slider2'),
+			// 	maxValue: 2000,
+			// 	step: 100
+			// });
 			// console.log(valueSlider2);
 
 			var valueSlider3 = new ValueSlider({
-				element: document.querySelector('#value-slider3')
+				element: document.querySelector('#value-slider3'),
+				maxValue: 400,
+				range: {
+					leftValue: 100
+				}
 			});
 			// console.log(valueSlider3);
 		
