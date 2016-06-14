@@ -90,7 +90,6 @@
 
 		// If this is a range slider
 		if (range !== 'undefined' && typeof range === 'object') {
-			// console.log(range.leftValue || 0);
 
 			// Create a left handle <div> and append it to the loading line <div>
 			var leftHandleDiv = document.createElement('div');
@@ -146,14 +145,16 @@
 	}
 
 	// Take step into account
-	function calculateSteps(self) {
-		var stepRemainder = self.rightValue % self.step;
+	function calculateSteps(step, value) {
+		var stepRemainder = value % step;
 
 		// smooth out the transitions
-		if (stepRemainder >= self.step / 2)
-			self.rightValue = self.rightValue - stepRemainder + self.step;
+		if (stepRemainder >= step / 2)
+			value = value - stepRemainder + step;
 		else
-			self.rightValue = self.rightValue - stepRemainder;
+			value = value - stepRemainder;
+
+		return value;
 	}
 
 	// Update the <input> element's value
@@ -273,7 +274,6 @@
 		var leftHandle = self.widget.getElementsByClassName('slider-handle-left')[0];
 
 		self.widget.addEventListener('mousedown', function(event) {
-			console.log();
 			if (self.rightHandleMouseDown === false) {
 
 				var mousePosition = getPositionOnSlider(self, event.clientX);
@@ -322,13 +322,13 @@
 		if (typeof perc === 'number') {
 
 			var value = ~~ (perc * (this.maxValue - this.minValue) + this.minValue);
-			var leftBound = (this.leftValue + (this.step || 1)) || this.maxValue;
+			var leftBound = this.leftValue ? this.leftValue + (this.step || 1) : this.minValue;
 			// Set the value
 			this.rightValue = clipValue(value, leftBound, this.maxValue, true);
 
 
 			if (this.step !== 0)
-				calculateSteps(this);
+				this.rightValue = calculateSteps(this.step, this.rightValue);
 
 			updateInputValue(this);
 
@@ -342,16 +342,12 @@
 		if (typeof perc === 'number') {
 
 			var value = ~~ (perc * (this.maxValue - this.minValue) + this.minValue);
-			var rightBound = this.rightValue - (this.step || 1) || this.maxValue;
+			var rightBound = this.rightValue ? this.rightValue - (this.step || 1) : this.maxValue;
 			// Set the value
 			this.leftValue = clipValue(value, 0, rightBound, true);
 
-
-
 			if (this.step !== 0)
-				calculateSteps(this);
-
-
+				this.leftValue = calculateSteps(this.step, this.leftValue);
 
 			updateInputValue(this);
 
@@ -368,11 +364,11 @@
 	ValueSlider.prototype.setRightValue = function(value, funcName) {
 		if (typeof value === 'number') {
 
-			var leftBound = (this.leftValue + (this.step || 1)) || this.maxValue;
+			var leftBound = this.leftValue ? this.leftValue + (this.step || 1) : this.minValue;
 			this.rightValue = clipValue(value, leftBound, this.maxValue, true); // Set the value
 
 			if (this.step !== 0)
-				calculateSteps(this);
+				this.rightValue = calculateSteps(this.step, this.rightValue);
 
 			updateInputValue(this);
 
@@ -384,11 +380,11 @@
 	ValueSlider.prototype.setLeftValue = function(value) {
 		if (typeof value === 'number') {
 
-			var rightBound = this.rightValue - (this.step || 1) || this.maxValue;		
+			var rightBound = this.rightValue ? this.rightValue - (this.step || 1) : this.maxValue;	
 			this.leftValue = clipValue(value, 0, rightBound, true); // Set the value
 
 			if (this.step !== 0)
-				calculateSteps(this);
+				this.leftValue = calculateSteps(this.step, this.leftValue);
 
 			updateInputValue(this);
 
