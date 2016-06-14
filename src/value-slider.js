@@ -127,18 +127,16 @@
 	*	@param {Boolean} leftHandle - indicates that the leftHandle is moved
 	*/
 	function renderValue(self, leftHandle) {
-		var valueSliderDiv = self.widget.children[0];
 
+		var valueSliderDiv = self.widget.children[0];
 		var value;
+
 		if (leftHandle) {
-			// var valueBarWidth = (self.widget.getElementsByClassName('slider-value')[0].offsetWidth);
 
 			value = (self.leftValue / (self.maxValue - self.minValue) * 100);
-
 			valueSliderDiv.style.left = value + '%';
 
-			value = (self.rightValue - self.leftValue) * 100 / (self.maxValue - self.minValue);
-			valueSliderDiv.style.width = value + '%';
+			renderValue(self); // Keep the right handle in place. This executes the else' branch.
 			
 		} else { // The right handle was moved
 			value = (self.rightValue - (self.leftValue || self.minValue)) * 100 / (self.maxValue - self.minValue);
@@ -324,9 +322,9 @@
 		if (typeof perc === 'number') {
 
 			var value = ~~ (perc * (this.maxValue - this.minValue) + this.minValue);
-
+			var leftBound = (this.leftValue + (this.step || 1)) || this.maxValue;
 			// Set the value
-			this.rightValue = clipValue(value, 0, this.maxValue, true);
+			this.rightValue = clipValue(value, leftBound, this.maxValue, true);
 
 
 			if (this.step !== 0)
@@ -344,13 +342,16 @@
 		if (typeof perc === 'number') {
 
 			var value = ~~ (perc * (this.maxValue - this.minValue) + this.minValue);
-
+			var rightBound = this.rightValue - (this.step || 1) || this.maxValue;
 			// Set the value
-			this.leftValue = clipValue(value, 0, this.maxValue, true);
+			this.leftValue = clipValue(value, 0, rightBound, true);
+
 
 
 			if (this.step !== 0)
 				calculateSteps(this);
+
+
 
 			updateInputValue(this);
 
@@ -367,7 +368,8 @@
 	ValueSlider.prototype.setRightValue = function(value, funcName) {
 		if (typeof value === 'number') {
 
-			this.rightValue = clipValue(value, this.minValue, this.maxValue, true); // Set the value
+			var leftBound = (this.leftValue + (this.step || 1)) || this.maxValue;
+			this.rightValue = clipValue(value, leftBound, this.maxValue, true); // Set the value
 
 			if (this.step !== 0)
 				calculateSteps(this);
@@ -382,7 +384,8 @@
 	ValueSlider.prototype.setLeftValue = function(value) {
 		if (typeof value === 'number') {
 
-			this.leftValue = clipValue(value, this.minValue, this.maxValue, true); // Set the value
+			var rightBound = this.rightValue - (this.step || 1) || this.maxValue;		
+			this.leftValue = clipValue(value, 0, rightBound, true); // Set the value
 
 			if (this.step !== 0)
 				calculateSteps(this);
