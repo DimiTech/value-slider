@@ -14,7 +14,7 @@
 
 		setParentDiv(this, options.element);
 		
-		createWidget(this, options.range);
+		createWidget(this, options);
 
 		setMinMaxAndStep(this, options.minValue || 0, 
 							   options.maxValue || 100, 
@@ -34,9 +34,7 @@
 			this.setValue(options.value || parseInt(this.parentDiv.getElementsByTagName('input')[0].defaultValue) || 0);
 		}
 
-		
-
-		setEventListeners(this, options.range);
+		setEventListeners(this, options.range, options.showMouseAt);
 
 		// Show the widget only when it's completely loaded
 		this.show();
@@ -74,7 +72,7 @@
 	}
 
 	// Creates HTML elements needed for the widget
-	function createWidget(self, range) {
+	function createWidget(self, options) {
 		// Create a container <div>
 		self.widget = document.createElement('div');
 		self.widget.className = 'value-slider-body'; 
@@ -88,8 +86,17 @@
 		valueSliderDiv.className = 'slider-value';
 		self.widget.appendChild(valueSliderDiv);
 
+		if (options.showBuffer === true) {
+			// Create a slider value <div> and append it to the container <div>
+			var bufferDiv = document.createElement('div');
+			bufferDiv.className = 'slider-buffered-value';
+			self.widget.appendChild(bufferDiv);
+			self.showBuffer = true;
+			self.buffered = 0;
+		}
+
 		// If this is a range slider
-		if (range !== 'undefined' && typeof range === 'object') {
+		if (options.range !== 'undefined' && typeof options.range === 'object') {
 
 			// Create a left handle <div> and append it to the loading line <div>
 			var leftHandleDiv = document.createElement('div');
@@ -97,12 +104,16 @@
 			self.widget.children[0].appendChild(leftHandleDiv);
 		}
 
+		if (options.showMouseAt === true) { // Show mouse position indicator
+			var mouseAtDiv = document.createElement('div');
+			mouseAtDiv.className = 'slider-mouse-at-value';
+			self.widget.appendChild(mouseAtDiv);
+		}
+
 		// Create a right handle <div> and append it to the loading line <div>
 		var rightHandleDiv = document.createElement('div');
 		rightHandleDiv.className = 'slider-handle-right';
 		self.widget.children[0].appendChild(rightHandleDiv);
-
-		
 		
 	}
 
@@ -179,9 +190,19 @@
 		return value;
 	}
 
+	function renderBuffer(self) {
+		var bufferDiv = self.widget.getElementsByClassName('slider-buffered-value')[0];
+		var rightHandle = self.widget.getElementsByClassName('slider-handle-right')[0];
+		var leftOffset = rightHandle.offsetLeft + 10;
+
+		/* TODO: Handle buffer filling */
+		bufferDiv.style.left = leftOffset + 'px';
+		bufferDiv.style.width = 30 + '%';
+	}
+
 	/* -------------------------------------- Event Listeners -------------------------------------- */	
 
-	function setEventListeners(self, range) {
+	function setEventListeners(self, range, displayMouseAt) {
 
 		if (range !== undefined)
 			setLeftHandleListener(self);
@@ -189,6 +210,9 @@
 		setRightHandleListener(self);
 
 		setClickListener(self);
+
+		if (displayMouseAt === true)
+			setHoverListener(self);
 
 	}
 
@@ -260,21 +284,23 @@
 	}
 
 	/**
-	*	Returns the position of the mouse on the slider - from 0 to 100
+	*	Returns the position of the mouse on the slider - from 0.0 to 1.0
 	*
 	*	@returns {Number} mousePosition
 	*/
-	function getPositionOnSlider(self, clientX) {
-		var mousePosition = ((clientX - self.widget.offsetLeft) / self.widget.clientWidth + 0.005);
+	function getPositionOnSlider(self, mouseX) {
+		var mousePosition = (mouseX - self.widget.offsetLeft) / self.widget.clientWidth;
 		return mousePosition;
 	}
 
 	function setClickListener(self) {
 		var rightHandle = self.widget.getElementsByClassName('slider-handle-right')[0];
-		var leftHandle = self.widget.getElementsByClassName('slider-handle-left')[0];
+		var leftHandle  = self.widget.getElementsByClassName('slider-handle-left')[0];
 
 		self.widget.addEventListener('mousedown', function(event) {
 			if (self.rightHandleMouseDown === false) {
+
+				event.preventDefault(); // Prevents selection
 
 				var mousePosition = getPositionOnSlider(self, event.clientX);
 				
@@ -305,8 +331,38 @@
 		// Checks if the mouse position is closer to the right handle 
 		function checkIfCloserToRight(mouseX, self) {
 			var sliderVal = self.parentDiv.getElementsByClassName('slider-value')[0];
-			// Calculate if the click was closer to the right
 			return (mouseX - sliderVal.offsetLeft) > (sliderVal.clientWidth / 2);
+		}
+	}
+
+	/**
+	*	This function accomodates the width of the mouseAt overlay <div> to the mouse position on the widget
+	*/
+	function setHoverListener(self) {
+		var mouseAtValDiv = self.widget.getElementsByClassName('slider-mouse-at-value')[0];
+
+		self.widget.addEventListener('mousemove', function(event) {
+			var mousePosition = getPositionOnSlider(self, event.clientX);
+
+			if (self.step !== 1) // If step is defined (if it's not the default (1))
+				mousePosition = adjustForSteps(self, mousePosition);
+
+			// Also clip it just for safety
+			mousePosition = clipValue(mousePosition, 0, 1, false);
+			mouseAtValDiv.style.width = mousePosition * 100 + '%';
+		});
+
+		self.widget.addEventListener('mouseleave', function(event) {
+			var mousePosition = 0;
+			mouseAtValDiv.style.width = mousePosition + '%';
+		});
+
+		function adjustForSteps(self, mousePosition) {
+			var valRange = (self.maxValue - self.minValue);
+			var value = mousePosition * valRange;
+			value = calculateSteps(self.step, value);
+			mousePosition = value / valRange;
+			return mousePosition;
 		}
 	}
 
@@ -322,7 +378,7 @@
 		if (typeof perc === 'number') {
 
 			var value = ~~ (perc * (this.maxValue - this.minValue) + this.minValue);
-			var leftBound = this.leftValue ? this.leftValue + (this.step || 1) : this.minValue;
+			var leftBound = this.leftValue !== undefined ? this.leftValue + (this.step || 1) : this.minValue;
 			// Set the value
 			this.rightValue = clipValue(value, leftBound, this.maxValue, true);
 
@@ -334,6 +390,9 @@
 
 			// Render the widget		
 			renderValue(this);
+
+			if (this.showBuffer === true)
+				renderBuffer(this);
 		} else 
 			throw new Error((funcName || 'setRightPercent()') + ' expects a floating point number parameter! (a value from 0.0 to 1.0)');
 	};
@@ -364,7 +423,7 @@
 	ValueSlider.prototype.setRightValue = function(value, funcName) {
 		if (typeof value === 'number') {
 
-			var leftBound = this.leftValue ? this.leftValue + (this.step || 1) : this.minValue;
+			var leftBound = this.leftValue !== undefined ? this.leftValue + (this.step || 1) : this.minValue;
 			this.rightValue = clipValue(value, leftBound, this.maxValue, true); // Set the value
 
 			if (this.step !== 0)
@@ -373,6 +432,9 @@
 			updateInputValue(this);
 
 			renderValue(this); // Render the widget
+
+			if (this.showBuffer === true)
+				renderBuffer(this);
 		} else 
 			throw new Error((funcName || 'setRightValue()') + ' expects a number parameter! (a value from ' + this.minValue + ' to ' + this.maxValue + ')');
 	};

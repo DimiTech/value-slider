@@ -25,7 +25,7 @@
 
 	<h1>Demo 1:</h1>
 	<input id="value-slider"  type="text">
-	<!-- <input id="value-slider2" type="text"> -->
+	<input id="value-slider2" type="text">
 	<input id="value-slider3" type="text" value="40">
 	
 	<script type="text/javascript">
@@ -36,14 +36,15 @@
 				value: 150,
 				minValue: 50,
 				maxValue: 300,
-				// step: 50
+				// step: 50,
+				showMouseAt: true,
+				showBuffer: true
 			});
 			// console.log(valueSlider1);
 
 			// var valueSlider2 = new ValueSlider({
 			// 	element: $('#value-slider2'),
-			// 	maxValue: 2000,
-			// 	step: 100
+			// 	maxValue: 2000
 			// });
 			// console.log(valueSlider2);
 
