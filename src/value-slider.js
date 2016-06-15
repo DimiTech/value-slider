@@ -108,6 +108,7 @@
 			var mouseAtDiv = document.createElement('div');
 			mouseAtDiv.className = 'slider-mouse-at-value';
 			self.widget.appendChild(mouseAtDiv);
+			self.mouseAt = true;
 		}
 
 		// Create a right handle <div> and append it to the loading line <div>
@@ -192,12 +193,7 @@
 
 	function renderBuffer(self) {
 		var bufferDiv = self.widget.getElementsByClassName('slider-buffered-value')[0];
-		var rightHandle = self.widget.getElementsByClassName('slider-handle-right')[0];
-		var leftOffset = rightHandle.offsetLeft + 10;
-
-		/* TODO: Handle buffer filling */
-		bufferDiv.style.left = leftOffset + 'px';
-		bufferDiv.style.width = 30 + '%';
+		bufferDiv.style.width = self.buffered + '%';
 	}
 
 	/* -------------------------------------- Event Listeners -------------------------------------- */	
@@ -230,8 +226,15 @@
 
 			document.addEventListener('mouseup', function(event) { 
 				if (self.rightHandleMouseDown) 
-					self.rightHandleMouseDown = false; 
+					self.rightHandleMouseDown = false;
+
+				// Hide the mouseAt <div>
+				if (self.mouseAt === true) 
+					mouseAtValDiv.style.width = '0%';
 			});
+
+			if (self.mouseAt === true)
+				var mouseAtValDiv = self.widget.getElementsByClassName('slider-mouse-at-value')[0];
 
 			document.addEventListener('mousemove', function(event) {
 				if (self.rightHandleMouseDown && event.which === 1) {
@@ -243,6 +246,12 @@
 					
 					// Update the value
 					self.setRightPercent(mousePosition);
+
+					if (self.mouseAt === true) {
+						var percent = ((rightHandle.offsetLeft + 10) / self.widget.offsetWidth) * 100;
+						mouseAtValDiv.style.width = percent + '%';
+					}
+					
 				}
 			});
 		};
@@ -342,14 +351,16 @@
 		var mouseAtValDiv = self.widget.getElementsByClassName('slider-mouse-at-value')[0];
 
 		self.widget.addEventListener('mousemove', function(event) {
-			var mousePosition = getPositionOnSlider(self, event.clientX);
+			if (self.rightHandleMouseDown === false) {
+				var mousePosition = getPositionOnSlider(self, event.clientX);
 
-			if (self.step !== 1) // If step is defined (if it's not the default (1))
-				mousePosition = adjustForSteps(self, mousePosition);
+				if (self.step !== 1) // If step is defined (if it's not the default (1))
+					mousePosition = adjustForSteps(self, mousePosition);
 
-			// Also clip it just for safety
-			mousePosition = clipValue(mousePosition, 0, 1, false);
-			mouseAtValDiv.style.width = mousePosition * 100 + '%';
+				// Also clip it just for safety
+				mousePosition = clipValue(mousePosition, 0, 1, false);
+				mouseAtValDiv.style.width = mousePosition * 100 + '%';
+			}
 		});
 
 		self.widget.addEventListener('mouseleave', function(event) {
@@ -390,9 +401,6 @@
 
 			// Render the widget		
 			renderValue(this);
-
-			if (this.showBuffer === true)
-				renderBuffer(this);
 		} else 
 			throw new Error((funcName || 'setRightPercent()') + ' expects a floating point number parameter! (a value from 0.0 to 1.0)');
 	};
@@ -432,9 +440,6 @@
 			updateInputValue(this);
 
 			renderValue(this); // Render the widget
-
-			if (this.showBuffer === true)
-				renderBuffer(this);
 		} else 
 			throw new Error((funcName || 'setRightValue()') + ' expects a number parameter! (a value from ' + this.minValue + ' to ' + this.maxValue + ')');
 	};
@@ -455,6 +460,14 @@
 			throw new Error('setLeftValue() expects a number parameter! (a value from ' + this.minValue + ' to ' + this.maxValue + ')');
 	};
 
+	/**
+	*  @param {Number} perc - percentage expressed as a decimal number (0.0-1.0)
+	*/
+	ValueSlider.prototype.setBufferPercent = function(perc) {
+		perc = clipValue(perc, 0, 1);
+		this.buffered = ~~(perc * 100);
+		renderBuffer(this, perc);
+	};
 
 	// __________ Getters __________ \\
 
