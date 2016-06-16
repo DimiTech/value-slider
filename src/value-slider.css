@@ -54,7 +54,6 @@
 .slider-buffered {
 	position: relative;
 	z-index: 20;
-	width: 0%;
 	height: 10px;
 	margin-top: -10px;
 	background-color: rgba(255, 255, 255, 0.2);
@@ -99,7 +98,7 @@
 	top: -10px;
 
     border-radius: 50%;
-	background-color: rgba(255, 255, 255, 0.5);
+	background-color: rgba(255, 255, 255, 1);
 }
 
 .slider-handle-left-vertical {
@@ -109,3 +108,12 @@
 .slider-handle-right-vertical {
 	top: calc(0% - 10px);
 }
+/*
+.slider-mouseat-vertical {
+	position: relative;
+	z-index: 22;
+	width: 0%;
+	height: 100%;
+	margin-top: -10px;
+	background-color: rgba(255, 255, 255, 0.2);
+}*/

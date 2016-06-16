@@ -20,7 +20,6 @@
 							   options.maxValue || 100, 
 							   options.step     || 1   );
 
-
 		if (options.vertical === true)
 			setToVertical(this, options.range !== undefined);
 
@@ -36,6 +35,11 @@
 			*   If <input> doesn't have a value then set the value to 0. 
 			*/
 			this.setValue(options.value || parseInt(this.parentDiv.getElementsByTagName('input')[0].defaultValue) || 0);
+		}
+
+		// Set the buffer value if a buffer is set
+		if (self.buffered !== undefined) {
+			this.setBufferPercent(this.buffered);
 		}
 
 		setEventListeners(this, options.range);
@@ -90,13 +94,12 @@
 		valueSliderDiv.className = 'slider-value';
 		self.widget.appendChild(valueSliderDiv);
 
-		if (options.showBuffer === true && options.range === undefined) {
-			// Create a slider value <div> and append it to the container <div>
+		if (options.showBuffer === true && options.range === undefined && options.vertical !== true) {
+			// Create a buffer value <div> and append it to the container <div>
 			var bufferDiv = document.createElement('div');
 			bufferDiv.className = 'slider-buffered';
 			self.widget.appendChild(bufferDiv);
-			self.showBuffer = true;
-			self.buffered = 0;
+			self.buffered = options.buffered || 0;
 		}
 
 		// If this is a range slider
@@ -151,6 +154,11 @@
 
 		var sliderVal = self.widget.getElementsByClassName('slider-value')[0];
 		sliderVal.className += '-vertical';
+
+		if (self.buffered !== undefined) {
+			var bufferDiv = self.widget.getElementsByClassName('slider-buffered')[0];
+			bufferDiv.className += '-vertical';
+		}
 
 		self.vertical = true;
 
@@ -376,7 +384,7 @@
 				if (self.leftHandleMouseDown !== undefined) { // If it's a range slider
 
 					var leftHandle  = getHandle(self, 'left');
-				
+
 					if (self.leftHandleMouseDown === false) {
 						event.preventDefault(); // Prevents selection
 
