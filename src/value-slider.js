@@ -174,21 +174,28 @@
 
 			value = (self.leftValue / (self.maxValue - self.minValue) * 100);
 
-			if (self.vertical === true)
-				valueSliderDiv.style.bottom = value + '%';
-			else
+			if (self.vertical === true) {
+				value += ((self.maxValue - self.rightValue) / (self.maxValue - self.minValue)) * 100;
+				valueSliderDiv.style.height = 100 - value + '%';
+			} else {
 				valueSliderDiv.style.left = value + '%';
-
-			renderValue(self); // Keep the right handle in place. This executes the else' branch.
+				renderValue(self); // Keep the right handle in place. This executes the else' branch.
+			}
 			
 		} else { // The right value was altered
 			value = (self.rightValue - (self.leftValue || self.minValue)) * 100 / (self.maxValue - self.minValue);
 			
 			if (self.vertical === true) {
 				valueSliderDiv.style.height = value + '%';
-				valueSliderDiv.style.top    = 100 - value + '%';
-			}
-			else
+
+				if (self.leftValue === undefined)
+					valueSliderDiv.style.top    = 100 - value + '%';
+				else { // We're dealing with a range slider
+					value = 100 - (self.leftValue / (self.maxValue - self.minValue) * 100) - value;
+					valueSliderDiv.style.top    = value + '%';
+				}
+
+			} else
 				valueSliderDiv.style.width = value + '%';
 		}
 		
@@ -284,6 +291,7 @@
 					// Update the value
 					self.setRightPercent(mousePosition);
 
+					// Draw the mouseAt indicator
 					if (self.mouseAt !== undefined) {
 						self.mouseAt = ((rightHandle.offsetLeft + 10) / self.widget.offsetWidth) * 100;
 						mouseAtValDiv.style.width = self.mouseAt + '%';
@@ -318,7 +326,7 @@
 
 					// Get mouse position on the slider
 					var mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
-					
+
 					// Update the value
 					self.setLeftPercent(mousePosition);
 				}
@@ -327,7 +335,7 @@
 
 	}
 
-	// Returns the requested widget handle
+	// Returns the requested slider handle
 	function getHandle(self, which) {
 		var handle;
 		if (self.vertical === true)
@@ -353,31 +361,45 @@
 		return mousePosition;
 	}
 
+	/**
+	*	When the user clicks anywhere on the widget, a closest handle is found and set to that position.
+	*	Further mouse events are delegated to that handle.
+	*/
 	function setClickListener(self) {
 		var rightHandle = getHandle(self, 'right');
-		var leftHandle  = getHandle(self, 'left');
 
 		self.widget.addEventListener('mousedown', function(event) {
 			if (self.rightHandleMouseDown === false) {
 
-				event.preventDefault(); // Prevents selection
+				var mousePosition;
 
-				var mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
+				if (self.leftHandleMouseDown !== undefined) { // If it's a range slider
+
+					var leftHandle  = getHandle(self, 'left');
 				
-				var closerToRight = true;
+					if (self.leftHandleMouseDown === false) {
+						event.preventDefault(); // Prevents selection
 
-				// If there's a left handle
-				if (self.leftValue !== undefined && self.leftHandleMouseDown !== undefined)
-					closerToRight = checkIfCloserToRight(event.clientX, self);
-
-				if (closerToRight) {
-					// Simulate mousedown event on the right handle
+						mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
+						
+						var closerToRight = checkIfCloserToRight(event.clientX, event.clientY, self);
+						
+						if (closerToRight && self.rightHandleMouseDown === false) {
+							// Simulate mousedown event on the right handle
+							simulateMouseDown(rightHandle);
+							self.setRightPercent(mousePosition);
+						} else if (self.leftHandleMouseDown === false) {
+							// Simulate mousedown event on the left handle
+							simulateMouseDown(leftHandle);
+							self.setLeftPercent(mousePosition);
+						}
+					}
+					
+				} else { // There's only the right handle
+					event.preventDefault(); // Prevents selection
+					mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
 					simulateMouseDown(rightHandle);
 					self.setRightPercent(mousePosition);
-				} else if (self.leftHandleMouseDown === false) {
-					// Simulate mousedown event on the left handle
-					simulateMouseDown(leftHandle);
-					self.setLeftPercent(mousePosition);
 				}
 			}
 		});
@@ -389,7 +411,7 @@
 		}
 
 		// Checks if the mouse position is closer to the right handle 
-		function checkIfCloserToRight(mouseX, self) {
+		function checkIfCloserToRight(mouseX, mouseY, self) {
 			var sliderValClassName = 'slider-value';
 
 			if (self.vertical === true)
@@ -397,7 +419,12 @@
 
 			var sliderVal = self.parentDiv.getElementsByClassName(sliderValClassName)[0];
 
-			return (mouseX - sliderVal.offsetLeft) > (sliderVal.clientWidth / 2);
+			var isCloser;
+			if (self.vertical === true)
+				isCloser = (mouseY - sliderVal.offsetTop) < (sliderVal.clientHeight / 2);
+			else
+				isCloser = (mouseX - sliderVal.offsetLeft) > (sliderVal.clientWidth / 2);
+			return isCloser;
 		}
 	}
 
