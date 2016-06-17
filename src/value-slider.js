@@ -16,9 +16,9 @@
 		
 		createWidget(this, options);
 
-		setPrpoperties(this, options.minValue || 0, 
-							 options.maxValue || 100, 
-							 options.step     || 1   );
+		setProperties(this, options.minValue || 0, 
+							options.maxValue || 100, 
+							options.step     || 1   );
 
 		if (options.vertical === true)
 			setToVertical(this, options.range !== undefined);
@@ -122,10 +122,40 @@
 		var rightHandleDiv = document.createElement('div');
 		rightHandleDiv.className = 'slider-handle-right';
 		self.widget.children[0].appendChild(rightHandleDiv);
-		
+
+		// If the user wants a tooltip
+		if (options.showTooltip !== false) {
+			// Create a tooltips
+			var tooltipContainer = document.createElement('div');
+			tooltipContainer.className = 'value-slider-tooltip';
+
+			var tooltipArrow = document.createElement('div');
+			if (options.vertical === true)
+				tooltipArrow.className = 'arrow-left';
+			else
+				tooltipArrow.className = 'arrow-up';
+
+			var tooltipBody = document.createElement('div');
+			tooltipBody.className = 'tooltip-body';
+			tooltipBody.textContent = '100'; // TODO: Delete this
+
+			if (options.vertical === true) {
+				tooltipContainer.style.marginLeft = '17px'; // TODO: Solve this in a better way
+			} else {
+				tooltipContainer.style.display = 'inline-block';
+			}
+
+			self.parentDiv.style.paddingRight += '3em';
+
+			tooltipContainer.appendChild(tooltipArrow);
+			tooltipContainer.appendChild(tooltipBody);
+			self.parentDiv.appendChild(tooltipContainer);
+
+			self.hasTooltip = true;
+		}
 	}
 
-	function setPrpoperties(self, min, max, step) {
+	function setProperties(self, min, max, step) {
 		if (min < max) {
 			self.minValue = min;
 			self.maxValue = max;
@@ -185,6 +215,9 @@
 			if (self.vertical === true) {
 				value += ((self.maxValue - self.rightValue) / (self.maxValue - self.minValue)) * 100;
 				valueSliderDiv.style.height = 100 - value + '%';
+
+				// Render the tooltip at the end
+				renderTooltip(self, value);
 			} else {
 				valueSliderDiv.style.left = value + '%';
 				renderValue(self); // Keep the right handle in place. This executes the else' branch.
@@ -205,9 +238,82 @@
 
 			} else
 				valueSliderDiv.style.width = value + '%';
+
+			// Render the tooltip at the end
+			renderTooltip(self, value);
 		}
-		
+
 	}
+
+	function renderTooltip(self, value) {
+		if (self.hasTooltip === true) {
+
+			var tooltipDiv   = self.parentDiv.getElementsByClassName('value-slider-tooltip')[0];
+
+			adjustWidthAndHeight(self, tooltipDiv);
+
+			adjustPosition(self, value, tooltipDiv);
+		}
+
+		// _____________________________ Nested tooltip functions ______________________________ \\
+
+		function adjustWidthAndHeight(self, tooltipDiv) {
+			
+			var tooltipBody  = tooltipDiv.querySelector('.tooltip-body');
+			
+			var tooltipDivWidth  = tooltipBody.clientWidth  + 1; // We need 1 more px to fit everything in
+			var tooltipDivHeight = tooltipBody.clientHeight + 1;
+
+			// Add the arrows dimensions
+			var tooltipArrow;
+			if (self.vertical === true) {
+				tooltipArrow = tooltipDiv.querySelector('.arrow-left');
+				tooltipDivWidth += tooltipArrow.offsetWidth;
+			} else { // It's a horizontal slider
+				tooltipArrow = tooltipDiv.querySelector('.arrow-up');
+				tooltipDivHeight += tooltipArrow.offsetHeight;
+			}
+
+			// Set tooltip width & height
+			tooltipDiv.style.width  = tooltipDivWidth  + 'px';
+			tooltipDiv.style.height = tooltipDivHeight + 'px';
+		}
+
+		function adjustPosition(self, value, tooltipDiv) {
+			var position;
+			if (self.leftValue === undefined) {	// If it's not a range slider
+
+				if (self.vertical === true) {
+					position = 100 - value - ( ((tooltipDiv.offsetHeight / 2) / self.widget.clientHeight) * 100);
+					tooltipDiv.style.top = position + '%';
+				} else {
+					// For some reason the "left" css property must go from -50% to 50%... which is fine, just subtract 50
+					position = value - 50;
+					tooltipDiv.style.left = position + '%';
+				}
+
+			} else { // It's a range slider
+				// position in between handles
+				position = 100 * ((self.leftValue + self.rightValue) / 2) / (self.maxValue - self.minValue);
+				
+				if (self.vertical === true) {
+					position = 100 - position + ((tooltipDiv.clientHeight / 4) / self.widget.clientHeight) * 100;
+					tooltipDiv.style.top = position + '%';
+				} else {
+					// position = ("average value, value between handles"  - "minimum value" /        "whole value range"      ) * 100
+					position = ( ( ((self.rightValue + self.leftValue) / 2) - self.minValue) / (self.maxValue - self.minValue) ) * 100;
+					// For some reason the "left" css property must go from -50% to 50%... which is fine, just subtract 50
+					position -= 50;
+					tooltipDiv.style.left = position + '%';
+				}
+
+			}
+			
+		} // end of adjustPosition() function
+
+		// _____________________________________________________________________________________ \\
+
+	}// end of renderTooltip() function
 
 	// Take step into account
 	function calculateSteps(step, value) {

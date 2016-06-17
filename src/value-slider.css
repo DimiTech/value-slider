@@ -62,24 +62,42 @@
 /* Tooltip Styling */
 
 .value-slider-tooltip {
-	
+	position: relative;
 }
+
 .value-slider-tooltip .arrow-left {
 	display: inline;
+	position: relative;
+	width: 0; height: 0;
 	float: left;
-	border-right: 5px solid #333;
+	border-right: 5px solid #ddd;
 	border-top: 5px solid transparent;
 	border-bottom: 5px solid transparent;
-	margin-top: 0.57em;
+  	top: 50%;
+  	transform: translateY(-50%);
 	line-height: 0;
 }
+
+.value-slider-tooltip .arrow-up {
+	display: block;
+	position: relative;
+	width: 0; height: 0;
+	border-bottom: 5px solid #ddd;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	margin: 0 auto;
+	line-height: 0;
+}
+
 .value-slider-tooltip .tooltip-body {
 	display: inline;
+	position: relative;
 	float: left;
-	background-color: #333;
+	background-color: #ddd;
 	padding: 5px 8px;
 	border-radius: 6px;
-	color: #FFF;
+	color: #000;
+	font-size: 14px;
 }
 
 /* --------------- Vertical Mode Styling --------------- */
