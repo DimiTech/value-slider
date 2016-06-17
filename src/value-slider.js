@@ -16,9 +16,9 @@
 		
 		createWidget(this, options);
 
-		setMinMaxAndStep(this, options.minValue || 0, 
-							   options.maxValue || 100, 
-							   options.step     || 1   );
+		setPrpoperties(this, options.minValue || 0, 
+							 options.maxValue || 100, 
+							 options.step     || 1   );
 
 		if (options.vertical === true)
 			setToVertical(this, options.range !== undefined);
@@ -38,9 +38,8 @@
 		}
 
 		// Set the buffer value if a buffer is set
-		if (self.buffered !== undefined) {
+		if (this.buffered !== undefined)
 			this.setBufferPercent(this.buffered);
-		}
 
 		setEventListeners(this, options.range);
 
@@ -55,9 +54,9 @@
 
 		var inputElem; // Our widget's input element (which will store it's value, useful for POST requests)
 
-		if (parentInput[0] !== undefined && parentInput[0].tagName === 'INPUT') // Handle the jQuery selector
+		if (parentInput !== undefined && parentInput[0] !== undefined && parentInput[0].tagName === 'INPUT') // Handle the jQuery selector
 			inputElem = parentInput[0];
-		else if (parentInput.tagName === 'INPUT') // Handle document.getElementById()
+		else if (parentInput !== undefined && parentInput.tagName === 'INPUT') // Handle document.getElementById()
 			inputElem = parentInput;
 		else // The user hasn't supplied a proper parent <input> element
 			throw new Error('Please supply an <input> element in which you wish to load the "ValueSlider" widget into.');
@@ -111,7 +110,8 @@
 			self.widget.children[0].appendChild(leftHandleDiv);
 		}
 
-		if (options.showMouseAt === true && options.range === undefined) { // Show mouse position indicator
+		if (options.showMouseAt === true && options.range === undefined && options.vertical !== true) { 
+			// Show mouse position indicator
 			var mouseAtDiv = document.createElement('div');
 			mouseAtDiv.className = 'slider-mouseat';
 			self.widget.appendChild(mouseAtDiv);
@@ -125,7 +125,7 @@
 		
 	}
 
-	function setMinMaxAndStep(self, min, max, step) {
+	function setPrpoperties(self, min, max, step) {
 		if (min < max) {
 			self.minValue = min;
 			self.maxValue = max;
@@ -180,7 +180,7 @@
 
 		if (leftHandle) { // The left value was altered
 
-			value = (self.leftValue / (self.maxValue - self.minValue) * 100);
+			value = (self.leftValue - self.minValue) * 100 / (self.maxValue - self.minValue);
 
 			if (self.vertical === true) {
 				value += ((self.maxValue - self.rightValue) / (self.maxValue - self.minValue)) * 100;
@@ -197,10 +197,10 @@
 				valueSliderDiv.style.height = value + '%';
 
 				if (self.leftValue === undefined)
-					valueSliderDiv.style.top    = 100 - value + '%';
+					valueSliderDiv.style.top = 100 - value + '%';
 				else { // We're dealing with a range slider
-					value = 100 - (self.leftValue / (self.maxValue - self.minValue) * 100) - value;
-					valueSliderDiv.style.top    = value + '%';
+					value = 100 - ((self.leftValue - self.minValue) / (self.maxValue - self.minValue)) * 100 - value;
+					valueSliderDiv.style.top = value + '%';
 				}
 
 			} else
@@ -564,6 +564,7 @@
 		} else
 			throw new Error('setBufferPercent() works only when there is a buffer');		
 	};
+
 
 	// __________ Getters __________ \\
 

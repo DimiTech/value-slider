@@ -51,12 +51,22 @@
 
 			var valueSlider3 = new ValueSlider({
 				element: document.querySelector('#value-slider3'),
-				maxValue: 400,
-				step: 40,
-				vertical: true,
-				range: {
-					leftValue: 120
-				}
+				value: 100, 			// Value of the single handle
+	minValue: 50, 			// Widget's minimum value (the default is 0)
+	maxValue: 300, 			// Widget's minimum value (the default is 100)
+	step: 10,  				/* Widget's value step (the defualt is 1).
+							   Slider's range (maxValue - minValue) must be divisible by step value without a remainder. */
+	vertical: true,			// Makes the widget vertical
+	height: '300px',		// Specifies the height of the widget (only works in vertical mode)
+	showMouseAt: true,		// Enables the overlay which shows the mouse position while it hovers over the widget. You can't use this with a range sliders or vertical oriented sliders.
+	showBuffer: true,		// Shows a buffer display. You can't use this with a range slider or vertical sliders.
+	buffered: 55,			// Sets the buffer's initial value (0.0 - 1.0)
+	showTooltip: false,		// Hides the tooltip (it's visible by defualt)
+	range: {				// Initialize the widget in "range" mode. Use this option if you want to specify a range using this widget
+		leftValue: 150,		// Value of the left handle
+		rightValue: 250	// Value of the right handle, overwrites the value option if both are specified
+		
+	}
 			});
 		
 	</script>

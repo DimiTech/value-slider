@@ -59,6 +59,29 @@
 	background-color: rgba(255, 255, 255, 0.2);
 }
 
+/* Tooltip Styling */
+
+.value-slider-tooltip {
+	
+}
+.value-slider-tooltip .arrow-left {
+	display: inline;
+	float: left;
+	border-right: 5px solid #333;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	margin-top: 0.57em;
+	line-height: 0;
+}
+.value-slider-tooltip .tooltip-body {
+	display: inline;
+	float: left;
+	background-color: #333;
+	padding: 5px 8px;
+	border-radius: 6px;
+	color: #FFF;
+}
+
 /* --------------- Vertical Mode Styling --------------- */
 
 .value-slider-vertical {
@@ -108,12 +131,3 @@
 .slider-handle-right-vertical {
 	top: calc(0% - 10px);
 }
-/*
-.slider-mouseat-vertical {
-	position: relative;
-	z-index: 22;
-	width: 0%;
-	height: 100%;
-	margin-top: -10px;
-	background-color: rgba(255, 255, 255, 0.2);
-}*/
