@@ -40,7 +40,10 @@
 				step: 50,
 				showMouseAt: true,
 				showBuffer: true,
-				buffered: 0.55
+				buffered: 0.55,
+				tooltipLabel: function(value) {
+					return 'The value is: ' + value;
+				}
 			});
 
 			var valueSlider2 = new ValueSlider({
@@ -58,6 +61,9 @@
 				range: {
 					leftValue: 120,
 					rightValue: 200
+				},
+				tooltipLabel: function(leftValue, rightValue) {
+					return 'L: ' + leftValue + ', R: ' + rightValue;
 				}
 			});
 		

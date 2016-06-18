@@ -63,6 +63,7 @@
 
 .value-slider-tooltip {
 	position: relative;
+	z-index: 24;
 }
 
 .value-slider-tooltip .arrow-left {
@@ -74,6 +75,7 @@
 	border-top: 5px solid transparent;
 	border-bottom: 5px solid transparent;
   	top: 50%;
+  	-ms-transform: translateY(-50%); /* Just for you IE ;) */
   	transform: translateY(-50%);
 	line-height: 0;
 }

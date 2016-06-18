@@ -137,23 +137,67 @@
 
 			var tooltipBody = document.createElement('div');
 			tooltipBody.className = 'tooltip-body';
-			tooltipBody.textContent = '100'; // TODO: Delete this
 
-			if (options.vertical === true) {
-				tooltipContainer.style.marginLeft = '17px'; // TODO: Solve this in a better way
-			} else {
-				tooltipContainer.style.display = 'inline-block';
-			}
-
-			self.parentDiv.style.paddingRight += '3em';
 
 			tooltipContainer.appendChild(tooltipArrow);
 			tooltipContainer.appendChild(tooltipBody);
 			self.parentDiv.appendChild(tooltipContainer);
 
+			setUpLabel(self, options, tooltipBody, tooltipArrow);
+
 			self.hasTooltip = true;
 		}
-	}
+
+		function setUpLabel(self, options, body, arrow) {
+
+			// Add default tooltip lable generating functions or use the one user has provided
+			if (typeof options.tooltipLabel === 'function') {
+				if (options.range !== 'undefined' && typeof options.range === 'object') {
+					// Check if there are 2 parameters
+					if (options.tooltipLabel.length === 2)
+						self.generateTooltipLabel = options.tooltipLabel;
+					else
+						throw new Error('tooltipLabel() must be declared with 2 parameters, valueLeft and valueRight.');
+					
+				} else {
+					self.generateTooltipLabel = options.tooltipLabel;
+				}
+
+				
+			} else {
+				// If it's a range slider
+				if (options.range !== 'undefined' && typeof options.range === 'object')
+					self.generateTooltipLabel = function(leftValue, rightValue) { return leftValue + ',' + rightValue; };
+				else // It's a normal (1 handle) slider
+					self.generateTooltipLabel = function(value) { return value; };
+			}
+
+			var longestPossibleLabel = String(self.generateTooltipLabel(options.maxValue));
+			body.textContent = longestPossibleLabel;
+
+			if (options.vertical === true) {
+				tooltipContainer.style.marginLeft = '17px'; // TODO: Solve this in a better way
+				self.parentDiv.style.paddingRight = body.clientWidth + arrow.clientWidth + 3 + 'px';
+
+				/* 	HACK ALERT! :)
+				* For some reason I have to use this dummy string in order for the tooltip to format properly.. 
+				* I picked zeroes for the dummy string since it's a "medium width" character (not too long like 'W', not too short like 'l')
+				* If next four lines didn't exist the tooltip css presentation would break
+				*/
+				var dummyString = '0';
+				for (var i = longestPossibleLabel.length; i >= 0; i--)
+					dummyString += '0';
+				body.textContent = dummyString;
+				// Weird but necessary...	TODO: Try to figure out what's the deal here.
+
+			} else {
+				tooltipContainer.style.display = 'inline-block';
+				body.textContent = longestPossibleLabel;
+			}
+
+		} // End of setUpLabel() function
+
+	} // End of createWidget() function
 
 	function setProperties(self, min, max, step) {
 		if (min < max) {
@@ -250,9 +294,15 @@
 
 			var tooltipDiv   = self.parentDiv.getElementsByClassName('value-slider-tooltip')[0];
 
+
 			adjustWidthAndHeight(self, tooltipDiv);
 
 			adjustPosition(self, value, tooltipDiv);
+
+			renderLabel(self, tooltipDiv);
+
+			// Calling this function again to fix DOM rendering bugs..
+			adjustWidthAndHeight(self, tooltipDiv);
 		}
 
 		// _____________________________ Nested tooltip functions ______________________________ \\
@@ -311,9 +361,18 @@
 			
 		} // end of adjustPosition() function
 
+		function renderLabel(self, tooltipDiv) {
+			var labelDiv = tooltipDiv.getElementsByClassName('tooltip-body')[0];
+
+			if (self.leftValue === undefined) // If it's not a range slider
+				labelDiv.textContent = self.generateTooltipLabel(self.rightValue);
+			else
+				labelDiv.textContent = self.generateTooltipLabel(self.leftValue, self.rightValue);
+		}
+
 		// _____________________________________________________________________________________ \\
 
-	}// end of renderTooltip() function
+	} // end of renderTooltip() function
 
 	// Take step into account
 	function calculateSteps(step, value) {
