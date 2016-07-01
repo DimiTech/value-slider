@@ -143,12 +143,12 @@
 			tooltipContainer.appendChild(tooltipBody);
 			self.parentDiv.appendChild(tooltipContainer);
 
-			setUpLabel(self, options, tooltipBody, tooltipArrow);
+			setUpTooltipLabel(self, options, tooltipBody, tooltipArrow);
 
 			self.hasTooltip = true;
 		}
 
-		function setUpLabel(self, options, body, arrow) {
+		function setUpTooltipLabel(self, options, body, arrow) {
 
 			// Add default tooltip lable generating functions or use the one user has provided
 			if (typeof options.tooltipLabel === 'function') {
@@ -172,7 +172,7 @@
 					self.generateTooltipLabel = function(value) { return value; };
 			}
 
-			var longestPossibleLabel = String(self.generateTooltipLabel(options.maxValue));
+			var longestPossibleLabel = String(self.generateTooltipLabel(options.maxValue, options.maxValue)); // The second arg is ignored this is a slider with a single handle
 			body.textContent = longestPossibleLabel;
 
 			if (options.vertical === true) {
@@ -180,9 +180,9 @@
 				self.parentDiv.style.paddingRight = body.clientWidth + arrow.clientWidth + 3 + 'px';
 
 				/* 	HACK ALERT! :)
-				* For some reason I have to use this dummy string in order for the tooltip to format properly.. 
-				* I picked zeroes for the dummy string since it's a "medium width" character (not too long like 'W', not too short like 'l')
-				* If next four lines didn't exist the tooltip css presentation would break
+				* 	For some reason I have to use this dummy string in order for the tooltip to format properly.. 
+				* 	I picked zeroes for the dummy string since it's a "medium width" character (not too long like 'W', not too short like 'l')
+				* 	If next four lines didn't exist the tooltip css presentation would break
 				*/
 				var dummyString = '0';
 				for (var i = longestPossibleLabel.length; i >= 0; i--)
@@ -254,7 +254,7 @@
 
 		if (leftHandle) { // The left value was altered
 
-			value = (self.leftValue - self.minValue) * 100 / (self.maxValue - self.minValue);
+			value = 100 * (self.leftValue - self.minValue) / (self.maxValue - self.minValue);
 
 			if (self.vertical === true) {
 				value += ((self.maxValue - self.rightValue) / (self.maxValue - self.minValue)) * 100;
@@ -293,7 +293,6 @@
 		if (self.hasTooltip === true) {
 
 			var tooltipDiv   = self.parentDiv.getElementsByClassName('value-slider-tooltip')[0];
-
 
 			adjustWidthAndHeight(self, tooltipDiv);
 
@@ -334,7 +333,8 @@
 			if (self.leftValue === undefined) {	// If it's not a range slider
 
 				if (self.vertical === true) {
-					position = 100 - value - ( ((tooltipDiv.offsetHeight / 2) / self.widget.clientHeight) * 100);
+					// Compensate for tooltip's height
+					position = 100 - value - ( ((tooltipDiv.clientHeight / 2) / self.widget.clientHeight) * 100);
 					tooltipDiv.style.top = position + '%';
 				} else {
 					// For some reason the "left" css property must go from -50% to 50%... which is fine, just subtract 50
@@ -343,15 +343,14 @@
 				}
 
 			} else { // It's a range slider
-				// position in between handles
-				position = 100 * ((self.leftValue + self.rightValue) / 2) / (self.maxValue - self.minValue);
-				
+				// position = average position, position between handles
+				position = 100 * ((self.rightValue + self.leftValue) / 2 - self.minValue) / (self.maxValue - self.minValue);
+				// position -=   / (self.maxValue - self.minValue) * 100;
 				if (self.vertical === true) {
-					position = 100 - position + ((tooltipDiv.clientHeight / 4) / self.widget.clientHeight) * 100;
+					// Compensate for tooltip's height
+					position = 100 - position - ((tooltipDiv.clientHeight / 2) / self.widget.clientHeight) * 100;
 					tooltipDiv.style.top = position + '%';
 				} else {
-					// position = ("average value, value between handles"  - "minimum value" /        "whole value range"      ) * 100
-					position = ( ( ((self.rightValue + self.leftValue) / 2) - self.minValue) / (self.maxValue - self.minValue) ) * 100;
 					// For some reason the "left" css property must go from -50% to 50%... which is fine, just subtract 50
 					position -= 50;
 					tooltipDiv.style.left = position + '%';
@@ -645,6 +644,9 @@
 	ValueSlider.prototype.setRightPercent = function(perc, funcName) {
 		if (typeof perc === 'number') {
 
+			// Only 3 significant digits after the decimal point
+			perc = perc.toFixed(3);
+
 			var value = ~~ (perc * (this.maxValue - this.minValue) + this.minValue);
 			var leftBound = this.leftValue !== undefined ? this.leftValue + (this.step || 1) : this.minValue;
 			// Set the value
@@ -664,6 +666,9 @@
 
 	ValueSlider.prototype.setLeftPercent = function(perc) {
 		if (typeof perc === 'number') {
+			
+			// Only 3 significant digits after the decimal point
+			perc = perc.toFixed(3);
 
 			var value = ~~ (perc * (this.maxValue - this.minValue) + this.minValue);
 			var rightBound = this.rightValue ? this.rightValue - (this.step || 1) : this.maxValue;
