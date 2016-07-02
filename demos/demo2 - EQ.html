@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Value Slider Demo</title>
+
+    <link href="../src/value-slider.css" type="text/css" rel="stylesheet">
+    <script src="../src/value-slider.js" type="text/javascript"></script>
+
+    <!-- Just some quick styling -->
+    <style>
+    	body {
+    		width: 480px;
+    		margin: 50px auto;
+    		text-align: center;
+    		font-family: Arial, sans-serif;
+    		color: #f7f7f7;
+    		background-color: #303030;
+    	}
+    </style>
+</head>
+<body>
+
+	<h1>Demo 2:</h1>
+	<p>This is all created with 'value-slider' widgets</p>
+	<audio id="track" controls>
+	  <source src="O.M.mp3" type="audio/mpeg">
+	  Your browser does not support the audio tag.
+	</audio>
+	<br>
+	<input id="seeker"	  type="text" value="0">
+	<input id="volume"    type="text" value="50">
+	<input id="low-freq"  type="text" value="50">
+	<input id="mid-freq"  type="text" value="50">
+	<input id="high-freq" type="text" value="50">
+	
+	<script type="text/javascript">
+
+		// Just a left pad util function
+		function leftPad(number) {
+			if (number < 10) return '0' + number;
+			else return number;
+		}
+
+		// Instantiate widgets
+
+		var seeker = new ValueSlider({
+			element: document.getElementById('seeker'),
+			minValue: 0,
+			maxValue: 250, // I've set the max value to be double the length of the song in seconds (snog is 2:05 long => maxValue = 125seconds * 2)
+			// showMouseAt: true,
+			tooltipLabel: function(value) {
+				return leftPad(~~(value / (2 * 60))) + ':' + leftPad(~~((value / 2) % 60));
+			}
+		});
+
+		var volumeFader = new ValueSlider({
+			element: document.getElementById('volume'),
+			minValue: 0,
+			maxValue: 100,
+			vertical: true,
+			tooltipLabel: function(value) {
+				return 'Volume: ' + value;
+			}
+		});
+
+		var lowFreqFader = new ValueSlider({
+			element: document.getElementById('low-freq'),
+			minValue: 0,
+			maxValue: 100,
+			vertical: true,
+			tooltipLabel: function(value) {
+				return 'Low: ' + value;
+			}
+		});
+
+		var midFreqFader = new ValueSlider({
+			element: document.getElementById('mid-freq'),
+			minValue: 0,
+			maxValue: 100,
+			vertical: true,
+			tooltipLabel: function(value) {
+				return 'Mid: ' + value;
+			}
+		});
+
+		var highFreqFader = new ValueSlider({
+			element: document.getElementById('high-freq'),
+			minValue: 0,
+			maxValue: 100,
+			vertical: true,
+			tooltipLabel: function(value) {
+				return 'High: ' + value;
+			}
+		});
+
+		// Change the color of EQ faders
+		lowFreqFader.widget.querySelector('.slider-value-vertical').style.background  = '#883faa';
+		midFreqFader.widget.querySelector('.slider-value-vertical').style.background  = '#883faa';
+		highFreqFader.widget.querySelector('.slider-value-vertical').style.background = '#883faa';
+
+		// Play the sound
+		var track = document.getElementById('track');
+		track.play();
+
+		// ---------- Setup the seeker ---------- \\
+
+		// Get track duration
+		var duration;
+		track.addEventListener('canplaythrough', function() {
+			duration = track.duration;
+		});
+
+		track.addEventListener('timeupdate', function() {
+			var playPercent = track.currentTime / duration;
+			seeker.setPercent(playPercent);
+		}, false);
+
+		// When the seeker 'value-slider' widget is changed, update the track position
+		var lastPosition = 0; // seconds
+		seeker.widget.addEventListener('change', function(event) {
+			var seconds = event.value / 2;
+			var deltaS = ~~(seconds - lastPosition); // The difference in seconds
+			if (deltaS >= 1 || deltaS <= -1)
+				track.currentTime = duration * (seconds / duration);
+			lastPosition = seeker.getValue() / 2;
+		}, false);
+
+	</script>
+</body>
+</html>

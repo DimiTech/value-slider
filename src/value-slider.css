@@ -114,7 +114,7 @@
 	display: inline-block;
 	height: 200px;
 	width: 10px;
-	margin: 10px;
+	margin: 10px 0px;
 }
 
 .value-slider-body-vertical {

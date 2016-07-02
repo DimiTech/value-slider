@@ -690,6 +690,9 @@
 
 			// Render the widget		
 			renderValue(this);
+
+			dispatchEvents(this);
+
 		} else 
 			throw new Error((funcName || 'setRightPercent()') + ' expects a floating point number parameter! (a value from 0.0 to 1.0)');
 	};
@@ -712,6 +715,9 @@
 
 			// Render the widget	
 			renderValue(this, true);
+
+			dispatchEvents(this);
+
 		} else 
 			throw new Error('setLeftPercent() expects a floating point number parameter! (a value from 0.0 to 1.0)');
 	};
@@ -732,6 +738,9 @@
 			updateInputValue(this);
 
 			renderValue(this); // Render the widget
+
+			dispatchEvents(this);
+
 		} else 
 			throw new Error((funcName || 'setRightValue()') + ' expects a number parameter! (a value from ' + this.minValue + ' to ' + this.maxValue + ')');
 	};
@@ -748,6 +757,9 @@
 			updateInputValue(this);
 
 			renderValue(this, true); // Render the widget
+			
+			dispatchEvents(this);
+			
 		} else 
 			throw new Error('setLeftValue() expects a number parameter! (a value from ' + this.minValue + ' to ' + this.maxValue + ')');
 	};
@@ -795,6 +807,24 @@
 		var displayVal = display || 'block';
 		this.widget.style.display = displayVal;
 	};
+
+	/* ------------------------------------------ Events ------------------------------------------- */
+
+	// The 'change' event, fired whenever a slider value is changed
+	function dispatchEvents(self) {
+		var changeEvent = document.createEvent('Event');
+		changeEvent.initEvent('change', true, true);
+
+		// Add properties to the event
+		if (self.range === undefined) // if it's not a range slider
+			changeEvent.value = self.rightValue;
+		else {	// it's a range slider
+			changeEvent.rightValue = self.rightValue;
+			changeEvent.leftValue =  self.leftValue;
+		}
+
+		self.widget.dispatchEvent(changeEvent);
+	}
 
 	/* ------------------------------------ Public Constructor ------------------------------------- */
 
