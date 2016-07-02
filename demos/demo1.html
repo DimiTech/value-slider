@@ -36,11 +36,12 @@
 				value: 150,
 				minValue: 50,
 				maxValue: 300,
-				vertical: true,
+				// vertical: true,
 				step: 50,
 				showMouseAt: true,
 				showBuffer: true,
 				buffered: 0.55,
+				invertTooltip: true,
 				tooltipLabel: function(value) {
 					return 'The value is: ' + value;
 				}
@@ -49,6 +50,7 @@
 			var valueSlider2 = new ValueSlider({
 				element: $('#value-slider2'),
 				maxValue: 2000,
+				// invertTooltip: true,
 				vertical: true
 			});
 
@@ -57,11 +59,12 @@
 				minValue: 40,
 				maxValue: 400,
 				step: 40,
-				vertical: true,
+				// vertical: true,
 				range: {
 					leftValue: 120,
 					rightValue: 200
 				},
+				// invertTooltip: true,
 				tooltipLabel: function(leftValue, rightValue) {
 					return 'L: ' + leftValue + ', R: ' + rightValue;
 				}

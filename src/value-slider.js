@@ -107,21 +107,21 @@
 			// Create a left handle <div> and append it to the loading line <div>
 			var leftHandleDiv = document.createElement('div');
 			leftHandleDiv.className = 'slider-handle-left';
-			self.widget.children[0].appendChild(leftHandleDiv);
+			valueSliderDiv.appendChild(leftHandleDiv);
 		}
 
 		if (options.showMouseAt === true && options.range === undefined && options.vertical !== true) { 
 			// Show mouse position indicator
 			var mouseAtDiv = document.createElement('div');
 			mouseAtDiv.className = 'slider-mouseat';
-			self.widget.appendChild(mouseAtDiv);
+			self.widget.insertBefore(mouseAtDiv, valueSliderDiv);
 			self.mouseAt = 0;
 		}
 
 		// Create a right handle <div> and append it to the loading line <div>
 		var rightHandleDiv = document.createElement('div');
 		rightHandleDiv.className = 'slider-handle-right';
-		self.widget.children[0].appendChild(rightHandleDiv);
+		valueSliderDiv.appendChild(rightHandleDiv);
 
 		// If the user wants a tooltip
 		if (options.showTooltip !== false) {
@@ -145,6 +145,29 @@
 
 			setUpTooltipLabel(self, options, tooltipBody, tooltipArrow);
 
+			// Invert the tooltip if that option is specified
+			if (options.invertTooltip === true) {
+
+				// Change the arrow
+				if (options.vertical === true) {
+					tooltipArrow.className = 'arrow-right';
+
+					self.widget.style.float = 'right';
+					tooltipContainer.style.float = 'right';
+				} else {
+					tooltipArrow.className = 'arrow-down';
+					tooltipArrow.style.top = tooltipBody.clientHeight + 'px';
+
+					// Change the order of the elements
+					self.parentDiv.removeChild(tooltipContainer);
+					self.parentDiv.insertBefore(tooltipContainer, self.widget);
+				}
+
+				// Put the arrow below the tooltip body
+				tooltipContainer.removeChild(tooltipArrow);
+				tooltipContainer.appendChild(tooltipArrow);
+
+			}
 			self.hasTooltip = true;
 		}
 
@@ -175,9 +198,15 @@
 			var longestPossibleLabel = String(self.generateTooltipLabel(options.maxValue, options.maxValue)); // The second arg is ignored this is a slider with a single handle
 			body.textContent = longestPossibleLabel;
 
-			if (options.vertical === true) {
-				tooltipContainer.style.marginLeft = '17px'; // TODO: Solve this in a better way
-				self.parentDiv.style.paddingRight = body.clientWidth + arrow.clientWidth + 3 + 'px';
+			if (options.vertical === true) { // Make adjustments on the vertical slider to fit the tooltip
+				
+				if (options.invertTooltip === true) {
+					tooltipContainer.style.marginRight = '6px'; // TODO: Solve this in a better way
+					self.parentDiv.style.width = body.clientWidth + arrow.clientWidth + 23 + 'px';
+				} else {
+					tooltipContainer.style.marginLeft = '17px'; // TODO: Solve this in a better way
+					self.parentDiv.style.width = body.clientWidth + arrow.clientWidth + 23 + 'px';
+				}
 
 				/* 	HACK ALERT! :)
 				* 	For some reason I have to use this dummy string in order for the tooltip to format properly.. 
@@ -188,14 +217,14 @@
 				for (var i = longestPossibleLabel.length; i >= 0; i--)
 					dummyString += '0';
 				body.textContent = dummyString;
-				// Weird but necessary...	TODO: Try to figure out what's the deal here.
+				// Weird but necessary...	
 
 			} else {
 				tooltipContainer.style.display = 'inline-block';
 				body.textContent = longestPossibleLabel;
 			}
 
-		} // End of setUpLabel() function
+		} // End of setUpTooltipLabel() function
 
 	} // End of createWidget() function
 
@@ -285,6 +314,7 @@
 
 			// Render the tooltip at the end
 			renderTooltip(self, value);
+			renderTooltip(self, value);
 		}
 
 	}
@@ -292,16 +322,17 @@
 	function renderTooltip(self, value) {
 		if (self.hasTooltip === true) {
 
-			var tooltipDiv   = self.parentDiv.getElementsByClassName('value-slider-tooltip')[0];
+			var tooltipDiv = self.parentDiv.getElementsByClassName('value-slider-tooltip')[0];
 
-			adjustWidthAndHeight(self, tooltipDiv);
+			if (self.vertical === true)
+				adjustWidthAndHeight(self, tooltipDiv);
 
 			adjustPosition(self, value, tooltipDiv);
 
 			renderLabel(self, tooltipDiv);
 
-			// Calling this function again to fix DOM rendering bugs..
-			adjustWidthAndHeight(self, tooltipDiv);
+			if (self.vertical === true)
+				adjustWidthAndHeight(self, tooltipDiv); // Calling this function again to fix DOM rendering bugs..
 		}
 
 		// _____________________________ Nested tooltip functions ______________________________ \\
@@ -309,19 +340,18 @@
 		function adjustWidthAndHeight(self, tooltipDiv) {
 			
 			var tooltipBody  = tooltipDiv.querySelector('.tooltip-body');
-			
+
 			var tooltipDivWidth  = tooltipBody.clientWidth  + 1; // We need 1 more px to fit everything in
 			var tooltipDivHeight = tooltipBody.clientHeight + 1;
 
 			// Add the arrows dimensions
-			var tooltipArrow;
-			if (self.vertical === true) {
-				tooltipArrow = tooltipDiv.querySelector('.arrow-left');
-				tooltipDivWidth += tooltipArrow.offsetWidth;
-			} else { // It's a horizontal slider
-				tooltipArrow = tooltipDiv.querySelector('.arrow-up');
-				tooltipDivHeight += tooltipArrow.offsetHeight;
-			}
+			var tooltipArrow = tooltipDiv.querySelector('.arrow-left');
+
+			if (tooltipArrow === null) // if the tooltip is inverted in the options
+				tooltipArrow = tooltipDiv.querySelector('.arrow-right');
+
+			tooltipDivWidth += tooltipArrow.offsetWidth;
+			
 
 			// Set tooltip width & height
 			tooltipDiv.style.width  = tooltipDivWidth  + 'px';
@@ -439,7 +469,7 @@
 
 			event.preventDefault(); // Prevents selection
 
-			if (self.rightHandleMouseDown === false) 
+			if (self.rightHandleMouseDown === false)
 				self.rightHandleMouseDown = true;
 
 			document.addEventListener('mouseup', function(event) { 

@@ -21,7 +21,7 @@
 
 .slider-handle-right, .slider-handle-left { 
 	position: absolute;
-	z-index: 24;
+	z-index: 25;
 	display: inline;
 	padding: 0; margin: 0;
     width: 20px;
@@ -44,10 +44,10 @@
 
 .slider-mouseat {
 	position: relative;
+	float: left;
 	z-index: 22;
 	width: 0%;
 	height: 100%;
-	margin-top: -10px;
 	background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -66,12 +66,12 @@
 	z-index: 24;
 }
 
-.value-slider-tooltip .arrow-left {
+.value-slider-tooltip .arrow-left,
+.value-slider-tooltip .arrow-right {
 	display: inline;
 	position: relative;
 	width: 0; height: 0;
 	float: left;
-	border-right: 5px solid #ddd;
 	border-top: 5px solid transparent;
 	border-bottom: 5px solid transparent;
   	top: 50%;
@@ -80,16 +80,22 @@
 	line-height: 0;
 }
 
-.value-slider-tooltip .arrow-up {
+.value-slider-tooltip .arrow-up,
+.value-slider-tooltip .arrow-down {
 	display: block;
 	position: relative;
 	width: 0; height: 0;
-	border-bottom: 5px solid #ddd;
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
 	margin: 0 auto;
 	line-height: 0;
 }
+
+.value-slider-tooltip .arrow-left { border-right: 5px solid #ddd; }
+.value-slider-tooltip .arrow-right { border-left: 5px solid #ddd; }
+
+.value-slider-tooltip .arrow-up {  border-bottom: 5px solid #ddd; }
+.value-slider-tooltip .arrow-down {   border-top: 5px solid #ddd; }
 
 .value-slider-tooltip .tooltip-body {
 	display: inline;
@@ -108,7 +114,7 @@
 	display: inline-block;
 	height: 200px;
 	width: 10px;
-	margin: 0 10px;
+	margin: 10px;
 }
 
 .value-slider-body-vertical {
