@@ -488,8 +488,8 @@
 				if (self.rightHandleMouseDown && event.which === 1) {
 
 					// Get mouse position on the slider
-					var mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
-					
+					var mousePosition = getPositionOnSlider(self, event.pageX, event.pageY);
+
 					// Update the value
 					self.setRightPercent(mousePosition);
 
@@ -527,7 +527,7 @@
 				if (self.leftHandleMouseDown && event.which === 1) {
 
 					// Get mouse position on the slider
-					var mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
+					var mousePosition = getPositionOnSlider(self, event.pageX, event.pageY);
 
 					// Update the value
 					self.setLeftPercent(mousePosition);
@@ -553,6 +553,7 @@
 	*	@returns {Number} mousePosition - mouse position on the slider (in percents).
 	*/
 	function getPositionOnSlider(self, mouseX, mouseY) {
+
 		var mousePosition;
 		if (self.vertical === true)
 			mousePosition = 1 - (mouseY - self.widget.offsetTop) / self.widget.clientHeight;
@@ -582,7 +583,7 @@
 					if (self.leftHandleMouseDown === false) {
 						event.preventDefault(); // Prevents selection
 
-						mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
+						mousePosition = getPositionOnSlider(self, event.pageX, event.pageY);
 						
 						var closerToRight = checkIfCloserToRight(event.clientX, event.clientY, self);
 						
@@ -599,7 +600,7 @@
 					
 				} else { // There's only the right handle
 					event.preventDefault(); // Prevents selection
-					mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
+					mousePosition = getPositionOnSlider(self, event.pageX, event.pageY);
 					simulateMouseDown(rightHandle);
 					self.setRightPercent(mousePosition);
 				}
@@ -638,7 +639,7 @@
 
 		self.widget.addEventListener('mousemove', function(event) {
 			if (self.rightHandleMouseDown === false) {
-				var mousePosition = getPositionOnSlider(self, event.clientX, event.clientY);
+				var mousePosition = getPositionOnSlider(self, event.pageX, event.pageY);
 
 				if (self.step !== 1) // If step is defined (if it's not the default (1))
 					mousePosition = adjustForSteps(self, mousePosition);
@@ -816,7 +817,7 @@
 		changeEvent.initEvent('change', true, true);
 
 		// Add properties to the event
-		if (self.range === undefined) // if it's not a range slider
+		if (self.leftValue === undefined) // if it's not a range slider
 			changeEvent.value = self.rightValue;
 		else {	// it's a range slider
 			changeEvent.rightValue = self.rightValue;
