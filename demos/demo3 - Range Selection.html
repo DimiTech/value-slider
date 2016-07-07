@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Value Slider Demo</title>
+
+    <link href="../src/value-slider.css" type="text/css" rel="stylesheet">
+    <script src="../src/value-slider.js" type="text/javascript"></script>
+
+    <!-- Just some quick styling -->
+    <style>
+    	body {
+    		width: 480px;
+    		margin: 50px auto;
+    		text-align: center;
+    		font-family: Arial, sans-serif;
+    	}
+
+    	/* Override some previous styles */
+    	.value-slider-body {
+    		border-radius: 4px;
+    		background-color: #FFF;
+    		border: 1px solid #b2b2b2;
+    	}
+    	.slider-value {
+    		background-color: #37a000;
+    	}
+    	.slider-handle-right, .slider-handle-left {
+    		border-radius: 30%;
+    		background-color: #b2b2b2;
+    	}
+    	.value-slider-tooltip .tooltip-body {
+    		background-color: #b2b2b2;
+    		color: #333;
+    	}
+    	.value-slider-tooltip .arrow-down {
+    		border-top-color: #b2b2b2;
+    	}
+    </style>
+</head>
+<body>
+
+	<h1>Demo 3:</h1>
+	<input id="cash-range" type="text">
+	
+	<script type="text/javascript">
+
+		// Instantiate widget
+		var rangeSlider = new ValueSlider({
+			element: document.getElementById('cash-range'),
+			minValue: 50,
+			maxValue: 1000,
+			range: {
+				leftValue: 50,
+				rightValue: 1000
+			},
+			step: 50,
+			invertTooltip: true,
+			tooltipLabel: function(lVal, rVal) {
+				return '$' + lVal + '- $' + rVal;
+			}
+		});
+
+	</script>
+</body>
+</html>
