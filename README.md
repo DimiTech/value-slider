@@ -1,5 +1,7 @@
 # JavaScript Value Slider
 
+A versatile UI slider widget useful for both single value and range selection. Check out the [demos](https://github.com/DusanDimitric/value-slider/tree/master/demos). for a couple of working examples.
+
 ## Features:
 
 - Pure JavaScript and CSS (no dependencies)
