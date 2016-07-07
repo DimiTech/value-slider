@@ -789,6 +789,13 @@
 		return this.rightValue;
 	};
 
+	ValueSlider.prototype.getLeftValue = function() {
+		if (this.leftValue)
+			return this.leftValue;
+		else
+			throw new Error('leftValue is only present on range sliders.'); 
+	};
+
 
 	// ______ Display methods ______ \\
 

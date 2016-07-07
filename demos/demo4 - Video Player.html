@@ -109,7 +109,7 @@
             timeDisplay.innerHTML = leftPad(~~(event.value / 60)) + ':' + leftPad(~~(event.value % 60)) + ' / 13:12';
         }, false);
 
-        // Simulate video playing
+        // Simulate a video playing
         var videoPlayingInterval = setInterval(function() {
             var currentVal = seeker.getValue();
             if (currentVal === seeker.maxValue)
