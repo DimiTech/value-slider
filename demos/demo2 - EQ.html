@@ -23,7 +23,7 @@
 
 	<h1>Demo 2:</h1>
 	<p>This is all created with 'value-slider' widgets</p>
-	<audio id="track" controls>
+	<audio id="track" style="display: none">
 	  <source src="O.M.mp3" type="audio/mpeg">
 	  Your browser does not support the audio tag.
 	</audio>
@@ -125,6 +125,13 @@
 				track.currentTime = duration * (seconds / duration);
 			lastPosition = seeker.getValue() / 2;
 		}, false);
+
+		// ---------- Listen to change events ---------- \\
+
+		volumeFader.addEventListener('change', function(event) {
+			track.volume = event.value / 100;
+			console.log('volume changed');
+		});
 
 	</script>
 </body>

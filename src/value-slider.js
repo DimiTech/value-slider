@@ -811,6 +811,11 @@
 
 	/* ------------------------------------------ Events ------------------------------------------- */
 
+	// Delegate event listening to this.widget
+	ValueSlider.prototype.addEventListener = function(event, eventHandler, useCapture) {
+		this.widget.addEventListener(event, eventHandler, useCapture || false);
+	};
+
 	// The 'change' event, fired whenever a slider value is changed
 	function dispatchEvents(self) {
 		var changeEvent = document.createEvent('Event');
