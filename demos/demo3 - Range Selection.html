@@ -15,6 +15,7 @@
     		text-align: center;
     		font-family: Arial, sans-serif;
     	}
+    	p { text-align: left; }
 
     	/* Override some previous styles */
     	.value-slider-body {
@@ -42,6 +43,7 @@
 
 	<h1>Demo 3:</h1>
 	<input id="cash-range" type="text">
+	<p id="values"></p>
 	
 	<script type="text/javascript">
 
@@ -60,6 +62,14 @@
 				return '$' + lVal + '- $' + rVal;
 			}
 		});
+
+		// Display the range slider's values in a paragraph
+		var rangeDisplay = document.getElementById('values');
+		rangeDisplay.innerHTML = 'Min: $' + rangeSlider.leftValue + '<br>Max: $' + rangeSlider.rightValue;
+
+		rangeSlider.addEventListener('change', function(event) {
+			rangeDisplay.innerHTML = 'Min: $' + event.leftValue + '<br>Max: $' + event.rightValue;
+		}, false);
 
 	</script>
 </body>

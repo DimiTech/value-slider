@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Value Slider Demo</title>
+
+    <link href="../src/value-slider.css" type="text/css" rel="stylesheet">
+    <script src="../src/value-slider.js" type="text/javascript"></script>
+
+    <!-- Just some quick styling -->
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #black-rectangle {
+            background-color: black;
+            width: 480px;
+            height: 300px;
+            margin: 50px auto;
+        }
+        #pretend-video {
+            width: 480px;
+            height: 275px;
+        }
+        #time {
+            float: left;
+            color: white;
+            font-size: 12px;
+            padding: 6px;
+        }
+        #tracker {
+            width: 80%;
+            float: right;
+        }
+
+        /* Override some previous styles */
+        .value-slider {
+            margin-top: -40px;
+            padding: 10px;
+        }
+        .value-slider-body {
+            background-color: rgba(255, 255, 255, 0.2);
+            height: 6px;
+        }
+        .slider-value {
+            background-color: #f12b24;
+        }
+        .slider-handle-right {
+            background-color: #f12b24;
+            width: 14px; height: 14px;
+            top: -4px;
+            z-index: 1009438;
+        }
+        .value-slider-tooltip {
+            margin-left: -8px;
+        }
+        .slider-buffered {
+            height: 6px;
+            margin-top: -6px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Demo 4:</h1> 
+
+    <div id="black-rectangle">
+
+        <div id="pretend-video"></div>
+
+        <div id="time">
+            <p id="values"></p>
+        </div>
+
+        <div id="tracker">
+            <input id="seeker" type="text">
+        </div>
+    </div> 
+    
+
+    
+    <script type="text/javascript">
+
+        // Just a left pad util function
+        function leftPad(number) {
+            if (number < 10) return '0' + number;
+            else return number;
+        }
+
+        // Instantiate widget
+        var seeker = new ValueSlider({
+            element: document.getElementById('seeker'),
+            minValue: 0,
+            maxValue: 792, // seconds
+            invertTooltip: true,
+            showMouseAt: true,
+            showBuffer: true,
+            buffered: 0.1,
+            tooltipLabel: function(seconds) {
+                return leftPad(~~(seconds / 60)) + ':' + leftPad(~~(seconds % 60));
+            }
+        });
+
+        // Display time
+        var timeDisplay = document.getElementById('time');
+        timeDisplay.innerHTML = '00:00 / 13:12';
+        seeker.addEventListener('change', function(event) {
+            timeDisplay.innerHTML = leftPad(~~(event.value / 60)) + ':' + leftPad(~~(event.value % 60)) + ' / 13:12';
+        }, false);
+
+        // Simulate video playing
+        var videoPlayingInterval = setInterval(function() {
+            var currentVal = seeker.getValue();
+            if (currentVal === seeker.maxValue)
+                clearInterval(videoPlayingInterval);
+            else {
+                seeker.setValue(currentVal + 1);
+                seeker.setBufferPercent((currentVal + 100) / seeker.maxValue);
+            }
+        }, 1000);
+
+    </script>
+</body>
+</html>
