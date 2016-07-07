@@ -5,7 +5,7 @@ A versatile UI slider widget useful for both single value and range selection. C
 ## Features:
 
 - Pure JavaScript and CSS (no dependencies)
-- Ultra light (11kb)
+- Ultra light (15kb with CSS)
 - Horizontal (default) or vertical orientation
 - Range selection mode
 - Buffer layer display (optional, only on horizontal sliders)
@@ -15,9 +15,9 @@ A versatile UI slider widget useful for both single value and range selection. C
 - Works in all browsers (even in decrepit old IEs)
 - For more, read about the options object in the docs
 
-## Usage
+## Usage:
 See the [documentation](https://github.com/DusanDimitric/value-slider/wiki/Documentation "documentation").
 
-## Demo Screenshots
+## Demo Screenshots:
 
 ![screenshots](https://github.com/DusanDimitric/value-slider/blob/master/demos/screenshots.png "Screenshots from demos")
