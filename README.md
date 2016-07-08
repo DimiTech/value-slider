@@ -20,4 +20,4 @@ See the [documentation](https://github.com/DusanDimitric/value-slider/wiki/Docum
 
 ## Demo Screenshots:
 
-![screenshots](https://github.com/DusanDimitric/value-slider/blob/master/demos/screenshots.png "Screenshots from demos")
+![screenshots](https://github.com/DusanDimitric/value-slider/blob/master/demos/screenshots.png "Screenshots of demos")
